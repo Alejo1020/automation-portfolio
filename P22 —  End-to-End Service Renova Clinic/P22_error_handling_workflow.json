@@ -1,0 +1,184 @@
+{
+  "name": "P22 — ERROR HANDLING / MANEJO DE ERRORES",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "🚨 BLOCK 6 — ERROR HANDLING / BLOQUE 6 — MANEJO DE ERRORES\n\nStandalone workflow that activates when ANY other P22 workflow fails.\nWorkflow independiente que se activa cuando CUALQUIER otro workflow de P22 falla.\nCaptures which workflow failed, at which node, and the error message. Alerts by email immediately.\nCaptura qué workflow falló, en qué nodo, y el mensaje de error. Avisa por email de inmediato.\nIt's the safety net for the entire ecosystem.\nEs la red de seguridad de todo el ecosistema.",
+        "height": 272,
+        "width": 704,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -80
+      ],
+      "id": "30f01a1f-fe64-4d49-8695-348dbb24a5f2",
+      "name": "Sticky Note34"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        512
+      ],
+      "id": "a699332c-2b09-46cc-a79d-804e6577dc95",
+      "name": "P22 — Manejo de Errores (Sistema)"
+    },
+    {
+      "parameters": {
+        "content": "🚨 FAILURE DETECTOR / ERROR TRIGGER — DETECTOR DE FALLOS\n\nActivates automatically when any workflow set as its \"Error Workflow\" fails.\nSe activa automáticamente cuando cualquier workflow configurado como su \"Error Workflow\" falla.\nCarries: workflow name, last node executed, and the exact error message.\nTrae: nombre del workflow, último nodo ejecutado, y mensaje de error exacto.\nRequires no configuration — n8n triggers it on its own.\nNo requiere configuración — n8n lo dispara solo.",
+        "height": 400,
+        "width": 640
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        272
+      ],
+      "id": "6e765b0e-19dd-49ff-8c73-9bfa545a515c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f0b6e15-31c1-4f41-8eac-11caf4a5a12d",
+              "name": "mensaje_alerta",
+              "value": "={{ '🚨 ERROR en el sistema P22 - Clínica Renova\\n\\nWorkflow: ' + $json.workflow.name + '\\nNodo que falló: ' + $json.execution.lastNodeExecuted + '\\nError: ' + $json.execution.error.message + '\\nHora: ' + $now.format('yyyy-MM-dd HH:mm') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        592,
+        512
+      ],
+      "id": "d4648403-8051-4b63-8b88-330e9eb7ee50",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "🔧 BUILD ALERT MESSAGE / ARMAR MENSAJE DE ALERTA\n\nExtracts from the Error Trigger: which workflow failed, at which node, and the exact error message.\nExtrae del Error Trigger: qué workflow falló, en qué nodo, y el mensaje de error exacto.\nBuilds a clear, actionable message to send right away.\nArma un texto claro y accionable para enviar de inmediato.",
+        "height": 384,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        304
+      ],
+      "id": "4cf7a606-4ce0-41b6-ada8-3d222f0810f8",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "sendTo": "alejandroarroval@gmail.com",
+        "subject": "🚨 Error en sistema P22 - Clínica Renova",
+        "message": "==<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background-color:#f9f7f5;\">\n  <div style=\"background:linear-gradient(135deg,#c0392b,#8b2418);padding:24px;border-radius:8px 8px 0 0;\">\n    <h1 style=\"color:#fff;margin:0;font-size:22px;\">🚨 Error en el Sistema</h1>\n    <p style=\"color:#f5c6c0;margin:4px 0 0;font-size:14px;\">Clínica Renova — Automatización P22</p>\n  </div>\n  <div style=\"background:#fff;padding:24px;border-radius:0 0 8px 8px;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n\n    <div style=\"background:#fdf2f2;border-left:4px solid #c0392b;padding:16px;border-radius:6px;margin-bottom:20px;\">\n      <p style=\"margin:0;color:#c0392b;font-weight:bold;font-size:14px;\">⚠️ Un bloque del sistema dejó de funcionar correctamente</p>\n    </div>\n\n    <table style=\"width:100%;border-collapse:collapse;font-size:14px;\">\n      <tr>\n        <td style=\"padding:10px 0;color:#888;width:130px;vertical-align:top;\">Workflow</td>\n        <td style=\"padding:10px 0;color:#333;font-weight:600;\">{{ $('P22 — Manejo de Errores (Sistema)').item.json.workflow.name }}</td>\n      </tr>\n      <tr style=\"border-top:1px solid #eee;\">\n        <td style=\"padding:10px 0;color:#888;vertical-align:top;\">Nodo que falló</td>\n        <td style=\"padding:10px 0;color:#333;font-weight:600;\">{{ $('P22 — Manejo de Errores (Sistema)').item.json.execution.lastNodeExecuted }}</td>\n      </tr>\n      <tr style=\"border-top:1px solid #eee;\">\n        <td style=\"padding:10px 0;color:#888;vertical-align:top;\">Hora</td>\n        <td style=\"padding:10px 0;color:#333;\">{{ $now.format('yyyy-MM-dd HH:mm') }}</td>\n      </tr>\n    </table>\n\n    <div style=\"background:#faf9f8;border:1px solid #eee;border-radius:6px;padding:14px;margin-top:16px;\">\n      <p style=\"margin:0 0 6px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;\">Mensaje de error</p>\n      <p style=\"margin:0;color:#c0392b;font-family:monospace;font-size:13px;line-height:1.5;\">{{ $('P22 — Manejo de Errores (Sistema)').item.json.execution.error.message }}</p>\n    </div>\n\n    <hr style=\"border:none;border-top:1px solid #eee;margin:24px 0;\">\n\n    <p style=\"color:#666;font-size:13px;line-height:1.6;margin:0;\">\n      Revisa la ejecución en n8n para más detalle. Mientras no se resuelva, este bloque puede estar dejando leads o citas sin procesar.\n    </p>\n\n    <p style=\"color:#bbb;font-size:11px;margin-top:24px;text-align:center;\">Alerta automática del sistema de Clínica Renova</p>\n  </div>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        512
+      ],
+      "id": "c4781a01-7fda-4254-b6f4-f4abfdb4d0c2",
+      "name": "Send a message",
+      "webhookId": "3491e72c-67c0-44fc-b332-d16ed5c5fdb7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gTmNXvBMnlDjAwZj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📧 SEND ALERT BY EMAIL / ENVIAR ALERTA POR EMAIL\n\nImmediately notifies the system owner when any P22 block fails.\nNotifica de inmediato al responsable del sistema cuando cualquier bloque de P22 falla.\nDirect email with urgent design — the priority is speed of notification.\nEmail directo con diseño de urgencia — la prioridad es velocidad de aviso.",
+        "height": 368,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        320
+      ],
+      "id": "15a6eb5b-1a90-4a40-86b7-a8378236f8b3",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {
+    "P22 — Manejo de Errores (Sistema)": [
+      {
+        "json": {
+          "execution": {
+            "id": "231",
+            "url": "https://n8n.example.com/execution/231",
+            "error": {
+              "message": "Error en el nodo HTTP Request: Bad request",
+              "stack": "NodeApiError: Bad request..."
+            },
+            "lastNodeExecuted": "HTTP Request"
+          },
+          "workflow": {
+            "id": "1",
+            "name": "P22 — Automatización end-to-end de un negocio de servicios (caso: Clínica Renova)"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "P22 — Manejo de Errores (Sistema)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "94cafd9f-3f42-4cda-abef-564b10e9c134",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad71c5258db3ecec46cfbe0407ab958981cfdc96a9b91ef604ec3c3ea533e7e0"
+  },
+  "nodeGroups": [],
+  "id": "67uiD4LqbWh1Wja1",
+  "tags": []
+}

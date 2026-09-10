@@ -1,0 +1,2075 @@
+{
+  "name": "P22 —  End-to-End Service Business Automation / Automatización end-to-end de un negocio de servicios",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "🎯 BLOCK 1 / BLOQUE 1 — ENTRY + QUALIFICATION / ENTRADA + CALIFICACIÓN\n\nUnifies 2 entry channels (WhatsApp + web form) into a single AI-powered qualification flow.\nUnifica 2 canales de entrada (WhatsApp + formulario web) en un solo flujo de calificación con IA.\n\nNormalizes data from both channels into a common format before scoring.\nNormaliza los datos de ambos canales a un formato común antes de calificar.\n\nOutput: qualified lead (score + category) ready for Block 2 or Block 3.\nOutput: lead calificado (score + categoría) listo para Bloque 2 o Bloque 3.",
+        "height": 400,
+        "width": 976,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -304
+      ],
+      "id": "6ca20efb-0331-4623-a5d9-74ec21447ec9",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "renova-whatsapp-in",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1360,
+        -272
+      ],
+      "id": "58aee510-ca2e-47e6-8431-4fb5f5be7b7d",
+      "name": "Webhook",
+      "webhookId": "6e58674b-d20f-45e3-9b7a-d1d778a40dca"
+    },
+    {
+      "parameters": {
+        "content": "📥 WEBHOOK — WHATSAPP ENTRY / ENTRADA WHATSAPP\n\nReceives incoming WhatsApp messages. Path: /renova-whatsapp-in\nRecibe mensajes entrantes de WhatsApp. Path: /renova-whatsapp-in\nCarries: From, Body (lead's message), and Twilio metadata.\nTrae: From, Body (mensaje del lead), y metadata de Twilio.\nRequires \"Respond to Webhook\" downstream — Twilio needs a valid HTTP response.\nRequiere \"Respond to Webhook\" más adelante — Twilio necesita respuesta HTTP válida.",
+        "height": 416,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        -544
+      ],
+      "id": "b2eba30c-d6d3-4689-83e6-26827b34127a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "renova-form-in",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1360,
+        224
+      ],
+      "id": "2aca895a-6766-46b6-9355-05547c6cf6bc",
+      "name": "Webhook1",
+      "webhookId": "f0ff33ce-328a-4819-a81a-2ec359b17471"
+    },
+    {
+      "parameters": {
+        "content": "📥 WEBHOOK — WEB FORM ENTRY / ENTRADA FORMULARIO WEB\n\nReceives submissions from the landing page form.\nRecibe envíos del formulario de la landing.\nCarries: name, phone, email, message, service_interest.\nTrae: nombre, telefono, email, mensaje, servicio_interes.\nBody structure differs from WhatsApp — normalized in the next node.\nEstructura de body distinta a WhatsApp — se normaliza en el siguiente nodo.",
+        "height": 384,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        -32
+      ],
+      "id": "f64bb2a1-ce52-4f9d-ac58-9708f44064d9",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -704,
+        -160
+      ],
+      "id": "265236e8-e213-4ec2-84b2-b108baff48fb",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "🔀 MERGE — COMBINE ENTRIES / UNIR ENTRADAS\n\nCombines items from both webhooks into one flow. Mode: Append.\nJunta los items de ambos webhooks en un solo flujo. Modo: Append.\nFrom here on, the flow is unified regardless of source channel.\nA partir de aquí el flujo es único sin importar el canal de origen.",
+        "height": 384,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -384
+      ],
+      "id": "5e5e1a7c-87ff-4d74-9bf7-62e59e851561",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $json;\nlet origen, nombre, telefono, mensaje, servicio_interes;\n\n// Detecta si viene de WhatsApp (Twilio) o del formulario\nif (item.body && item.body.From) {\n  origen = 'whatsapp';\n  telefono = item.body.WaId;\n  mensaje = item.body.Body;\n  nombre = item.body.ProfileName || 'Sin nombre (WhatsApp)';\n  servicio_interes = 'No especificado';\n} else {\n  origen = 'formulario_web';\n  nombre = item.body.nombre;\n  telefono = item.body.telefono;\n  mensaje = item.body.mensaje;\n  servicio_interes = item.body.servicio_interes || 'No especificado';\n}\n\nreturn {\n  origen,\n  nombre,\n  telefono,\n  mensaje,\n  servicio_interes,\n  fecha_ingreso: new Date().toISOString()\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -160
+      ],
+      "id": "204ad9f2-97c4-4142-8cb9-e0352aeaf71f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "🔧 NORMALIZE DATA / NORMALIZAR DATOS\n\nDetects the source channel and builds a unified object: source, name, phone, message, service_interest.\nDetecta el canal de origen y arma un objeto único: origen, nombre, telefono, mensaje, servicio_interes.\nCritical point: no downstream node should read the Webhooks directly — all use this normalized object.\nPunto crítico: ningún nodo downstream debe leer los Webhooks directo — todos usan este objeto normalizado.",
+        "height": 416,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -416
+      ],
+      "id": "c9b4f841-a35a-4a83-807b-280c89b2fc87",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2352,
+        368
+      ],
+      "id": "533f9625-c27b-47b7-ab63-059d2b028ddd",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 300,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Eres un calificador de leads para una clínica estética. Analiza este mensaje y responde SOLO con JSON: {\\\"score\\\": 1-10, \\\"categoria\\\": \\\"frio/tibio/caliente\\\", \\\"razon\\\": \\\"breve\\\"}. Nombre: {{ $json.nombre }}. Mensaje: {{ $json.mensaje }}. Servicio de interés: {{ $json.servicio_interes }}. Origen: {{ $json.origen }}.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -688,
+        368
+      ],
+      "id": "bc6b580d-403b-4355-bedf-e06e80555dc1",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "XLGM3QgueVEsFdgs",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 QUALIFY LEAD WITH CLAUDE / CALIFICAR LEAD CON CLAUDE\n\nClaude Sonnet 5 scores: 1-10, category cold/warm/hot, brief reasoning.\nClaude Sonnet 5 califica: score 1-10, categoría frío/tibio/caliente, razón breve.\nResponds in pure JSON, though sometimes wrapped in markdown backticks — cleaned in the next node.\nResponde en JSON puro, aunque a veces viene envuelto en backticks de markdown — se limpia después.",
+        "height": 368,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        160
+      ],
+      "id": "89777cbe-179e-4bc5-a268-0bbd8059e517",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5443c3a0-b8ce-4a56-a2ec-7c9ae1cb916e",
+              "name": "resultado_limpio",
+              "value": "={{ $json.content[0].text.replace('```json', '').replace('```', '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        80,
+        368
+      ],
+      "id": "f9675f34-d31b-4e3f-9f62-a09950efcab0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "🧹 CLEAN CLAUDE'S RESPONSE / LIMPIAR RESPUESTA DE CLAUDE\n\nStrips markdown backticks that Claude sometimes adds.\nQuita los backticks de markdown que Claude a veces agrega.\nLeaves the JSON ready to parse in the next node.\nDeja el JSON listo para parsear en el siguiente nodo.",
+        "height": 336,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        176
+      ],
+      "id": "a865645f-c02d-457b-9a5f-1f31d8e0eb64",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($json.resultado_limpio);\nconst leadOriginal = $('Code in JavaScript').item.json;\n\nreturn {\n  origen: leadOriginal.origen,\n  nombre: leadOriginal.nombre,\n  telefono: leadOriginal.telefono,\n  mensaje: leadOriginal.mensaje,\n  servicio_interes: leadOriginal.servicio_interes,\n  fecha_ingreso: leadOriginal.fecha_ingreso,\n  score: parsed.score,\n  categoria: parsed.categoria,\n  razon: parsed.razon\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        368
+      ],
+      "id": "756b6f19-1f7b-4bc5-be59-b0ca71d82c1b",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PARSE & CONSOLIDATE QUALIFIED LEAD / PARSEAR Y CONSOLIDAR LEAD CALIFICADO\n\nParses Claude's clean JSON and merges it with the original lead data.\nParsea el JSON limpio de Claude y lo combina con los datos originales del lead.\nOutput: complete object ready to save to Sheets.\nOutput: objeto completo listo para guardar en Sheets.",
+        "height": 352,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        544,
+        160
+      ],
+      "id": "d67ac6e0-af3f-4a44-911d-57fc46747168",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1VgSnnOer4FRXKGLNZtSNNCQkv3LezpEaBEPUgykeKUU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1051610244,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VgSnnOer4FRXKGLNZtSNNCQkv3LezpEaBEPUgykeKUU/edit#gid=1051610244"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "servicio_interes",
+              "displayName": "servicio_interes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_ingreso",
+              "displayName": "fecha_ingreso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "razon",
+              "displayName": "razon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1504,
+        368
+      ],
+      "id": "c0dd057b-2599-4d57-871c-50ee51960769",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 SAVE QUALIFIED LEAD TO SHEETS / GUARDAR LEAD CALIFICADO EN SHEETS\n\nCentral record of all leads (WhatsApp + form) with their qualification.\nRegistro central de todos los leads (WhatsApp + formulario) con su calificación.\nSheet: P22_Leads_Clinica_Renova. Source of truth for Scheduling, Nurturing, and Reporting.\nSheet: P22_Leads_Clinica_Renova. Fuente de verdad para Agendamiento, Nutrición y Reporting.",
+        "height": 368,
+        "width": 672
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        144
+      ],
+      "id": "5518314f-971e-49e4-8938-b433f798be21",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "📤 RESPOND TO WEBHOOK\n\nReturns the final response to whoever sent the lead (Twilio or the form).\nDevuelve la respuesta final a quien mandó el lead (Twilio o el formulario).\nCloses the Block 1 loop — without this node, both channels would hang.\nCierra el ciclo del Bloque 1 — sin este nodo, ambos canales quedarían colgados.",
+        "height": 336,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        176
+      ],
+      "id": "6db7f3ff-fba1-4dfa-b7f3-749ed5bf118f",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "📅 BLOCK 2 — SCHEDULING / BLOQUE 2 — AGENDAMIENTO\n\nRoutes the qualified lead based on its category:\nEnruta el lead calificado según su categoría:\nHot/Warm → automatic scheduling. Cold → passes to Block 3 (Nurturing).\nCaliente/Tibio → agendamiento automático. Frío → pasa a Bloque 3 (Nutrición).\nAppointments Sheet as source of truth, avoids double-booking.\nSheet de citas como fuente de verdad, evita doble-booking.",
+        "height": 240,
+        "width": 1216,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1408,
+        688
+      ],
+      "id": "518e5e93-bff4-44a8-9568-735294e41685",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "536c00be-9604-4a61-810d-057e235f348d",
+              "leftValue": "={{ $json.categoria }}",
+              "rightValue": "frio",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1360,
+        1216
+      ],
+      "id": "bcba04ac-f1ad-4be7-bfa2-250e9fcfdb06",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "🔀 IF — ROUTE BY CATEGORY / ENRUTAR SEGÚN CATEGORÍA\n\nTrue (category ≠ cold) → Schedule: hot and warm.\nTrue (categoria ≠ frío) → Agendar: caliente y tibio.\nFalse (category = cold) → Nurture (Block 3).\nFalse (categoria = frío) → Nutrir (Bloque 3).\nCritical point: after this If, reference the previous node with .first(), not generic $json.\nPunto crítico: después de este If, referenciar el nodo anterior con .first(), no $json genérico.",
+        "height": 352,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        992
+      ],
+      "id": "38ba737d-0c39-417a-9b14-e22c9c07e484",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Lead: {{ $('If').item.json.nombre }}\nTeléfono: {{ $('If').item.json.telefono }}\nServicio de interés: {{ $('If').item.json.servicio_interes }}\nCategoría: {{ $('If').item.json.categoria }}\nMensaje original: {{ $('If').item.json.mensaje }}",
+        "options": {
+          "systemMessage": "=Fecha y hora actual: {{ $now.format('yyyy-MM-dd HH:mm') }} ({{ $now.format('cccc') }})\n\nEres el asistente de agendamiento de Clínica Renova.\nHorario de atención: Lunes a Sábado, 9am a 6pm.\nCada cita dura 1 hora.\nTu tarea: revisar las citas existentes con la tool \"Consultar Citas\", encontrar el próximo horario disponible a partir de mañana, y agendar la cita usando la tool \"Agendar Cita\".\nReglas:\n- Nunca propongas un horario ya ocupado.\n- Si el lead es \"caliente\", prioriza el horario más próximo disponible.\n- Si es \"tibio\", cualquier horario disponible esta semana sirve.\n- Calcula las fechas (\"mañana\", \"esta semana\") siempre en base a la fecha actual indicada arriba, nunca las inventes.\nResponde SOLO con JSON: {\"fecha\": \"YYYY-MM-DD\", \"hora\": \"HH:MM\", \"estado\": \"agendada\"}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        992
+      ],
+      "id": "f88a1dfc-e7d0-45ec-b52c-3d194fa507a0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-5",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        -16,
+        1200
+      ],
+      "id": "7415ff63-f560-4b87-b0a1-7c4ddc433bc5",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "4CMKZUbbCkmFn9gI",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nArEQj7yLh-Ncuc37rgMkqrZi9GQZGcEc8SjjGnOSV8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1764839402,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nArEQj7yLh-Ncuc37rgMkqrZi9GQZGcEc8SjjGnOSV8/edit#gid=1764839402"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fecha', `Fecha de la cita en formato YYYY-MM-DD`, 'string') }}",
+            "hora": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('hora', `Hora de la cita en formato HH:MM (24 horas)`, 'string') }}",
+            "nombre_cliente": "={{ $('If').item.json.nombre }}",
+            "telefono": "={{ $('If').item.json.telefono }}",
+            "servicio": "={{ $('If').item.json.servicio_interes }}",
+            "estado": "agendada"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_cliente",
+              "displayName": "nombre_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "servicio",
+              "displayName": "servicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        1200
+      ],
+      "id": "f3e60509-586f-42f1-8e70-03cf29e9f2fa",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1nArEQj7yLh-Ncuc37rgMkqrZi9GQZGcEc8SjjGnOSV8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1764839402,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nArEQj7yLh-Ncuc37rgMkqrZi9GQZGcEc8SjjGnOSV8/edit#gid=1764839402"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        352,
+        1200
+      ],
+      "id": "e3021646-9068-4765-858a-891b4616688a",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 AI AGENT — PROPOSE & BOOK APPOINTMENT / PROPONER Y AGENDAR CITA\n\nClaude Sonnet 5 with 2 tools: Check Calendar (reads schedule) and Book Appointment (writes new row).\nClaude Sonnet 5 con 2 tools: Consultar Citas (lee agenda) y Agendar Cita (escribe fila nueva).\nBusiness hours: Monday-Saturday 9am-6pm, 1-hour appointments.\nHorario de negocio: Lunes-Sábado 9am-6pm, citas de 1 hora.\nReceives real current date/time injected into the System Message to avoid hallucinating dates.\nRecibe fecha/hora actual real inyectada en el System Message para no alucinar fechas.\nHot = closest available slot. Warm = any slot this week. No Memory: atomic call, not a conversation.\nCaliente = horario más próximo. Tibio = cualquier horario esta semana. Sin Memory: llamada atómica.",
+        "height": 656,
+        "width": 864
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        720
+      ],
+      "id": "2eee9ec8-8667-4cd1-a9ee-6ae44045e76b",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 250,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Eres el asistente de Clínica Renova. Este lead mostró interés pero aún no está listo para agendar (categoría fría). Escribe un mensaje corto de WhatsApp (máx 3 líneas), cálido y de valor, NO de venta directa — comparte un tip relacionado a su interés y deja la puerta abierta sin presionar. Nombre: {{ $('If').item.json.nombre }}. Servicio de interés: {{ $('If').item.json.servicio_interes }}. Mensaje original: {{ $('If').item.json.mensaje }}. Responde SOLO con el texto del mensaje, sin comillas ni JSON.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1520,
+        2160
+      ],
+      "id": "a9c483b2-e7a3-4e09-ae9d-6c5fd808a1c8",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "XLGM3QgueVEsFdgs",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🌱 BLOCK 3 — NURTURING / BLOQUE 3 — NUTRICIÓN\n\nReceives \"cold\" category leads (False branch of Block 2's If).\nRecibe leads categoría \"frío\" (rama False del If del Bloque 2).\nSends a value message via WhatsApp (no hard sell) and logs as \"in nurturing\".\nEnvía mensaje de valor vía WhatsApp (no venta directa) y registra como \"en nutrición\".",
+        "height": 304,
+        "width": 736,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1408,
+        1520
+      ],
+      "id": "690a6ac7-cf30-4e3a-9f55-452ecd655ce0",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "🌱 GENERATE NURTURE MESSAGE / GENERAR MENSAJE DE NUTRICIÓN\n\nClaude Sonnet 5 drafts a short WhatsApp message — warm tone, value-driven, no sales pressure.\nClaude Sonnet 5 redacta mensaje corto de WhatsApp — tono cálido, valor, sin presión de venta.\nMax 3 lines. Responds in plain text, not JSON.\nMáx 3 líneas. Responde en texto plano, no JSON.",
+        "height": 368,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1760,
+        1952
+      ],
+      "id": "a46d194a-db84-45fd-817e-d262b53c92ad",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21727ca1-e7b0-4206-8533-eeca5f2e9e8b",
+              "name": "mensaje_nutricion",
+              "value": "={{ $json.content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -832,
+        2160
+      ],
+      "id": "0a2983c9-bd5b-4001-80a4-1fb80a49110c",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "content": "✂️ EXTRACT NURTURE MESSAGE / EXTRAER MENSAJE DE NUTRICIÓN\n\nPulls the clean text from Claude's response.\nSaca el texto limpio de la respuesta de Claude.",
+        "height": 320,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -992,
+        2000
+      ],
+      "id": "26c04f9e-99c4-4064-b110-8577a864b7a5",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/AC_YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+{{ $('If').item.json.telefono.toString().startsWith('57') ? $('If').item.json.telefono : '57' + $('If').item.json.telefono }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.mensaje_nutricion }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -128,
+        2160
+      ],
+      "id": "addbfeec-c882-4fe8-a45a-277df14a32be",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "LQyEArLzg0pmjClm",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📲 SEND NURTURE MESSAGE VIA WHATSAPP / ENVIAR MENSAJE DE NUTRICIÓN POR WHATSAPP\n\nSends the Claude-generated message to the cold lead via Twilio.\nManda el mensaje generado por Claude al lead frío vía Twilio.\nBody in form-urlencoded, different from the nodes that talk to the Claude API.\nBody en form-urlencoded, distinto a los nodos que hablan con Claude API.",
+        "height": 352,
+        "width": 656
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        1968
+      ],
+      "id": "18a698b6-576b-4eba-a72f-d5875af0299f",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19AfyV6pAL_3VW96VpKsp-KPwJQ5M_9-pCAzrPP1jeO0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1974870539,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19AfyV6pAL_3VW96VpKsp-KPwJQ5M_9-pCAzrPP1jeO0/edit#gid=1974870539"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $('If').item.json.nombre }}",
+            "telefono": "={{ $('If').item.json.telefono }}",
+            "servicio_interes": "={{ $('If').item.json.servicio_interes }}",
+            "mensaje_original": "={{ $('If').item.json.mensaje }}",
+            "mensaje_nutricion": "={{ $('Edit Fields1').item.json.mensaje_nutricion }}",
+            "fecha_envio": "={{ $now.format('yyyy-MM-dd') }}",
+            "estado_seguimiento": "pendiente"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "servicio_interes",
+              "displayName": "servicio_interes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_original",
+              "displayName": "mensaje_original",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensaje_nutricion",
+              "displayName": "mensaje_nutricion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_envio",
+              "displayName": "fecha_envio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado_seguimiento",
+              "displayName": "estado_seguimiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        640,
+        2160
+      ],
+      "id": "c870fc72-b42c-4c14-8ee4-b3e9756a883f",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 LOG LEAD IN NURTURING / REGISTRAR LEAD EN NUTRICIÓN\n\nSaves lead + message + date, \"pending\" status for future follow-up.\nGuarda lead + mensaje + fecha, estado \"pendiente\" para seguimiento futuro.\nSheet: P22_Nutricion_Clinica_Renova.",
+        "height": 320,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        2000
+      ],
+      "id": "f7c35926-3c7b-4454-bbfe-4f96ec37b2c7",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "📊 BLOCK 4 — OWNER REPORTING / BLOQUE 4 — REPORTING AL DUEÑO\n\nRuns daily (Schedule Trigger, 8am). Reads the system's 3 Sheets, consolidates metrics,\nCorre diario (Schedule Trigger, 8am). Lee los 3 Sheets del sistema, consolida métricas,\nand asks Claude for an executive summary. Emails it to the owner.\ny le pide a Claude un resumen ejecutivo. Envía por email al dueño.",
+        "height": 256,
+        "width": 768,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1264,
+        2512
+      ],
+      "id": "8bdfce1d-6bfe-4769-b9a4-3daf514d0629",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1568,
+        3152
+      ],
+      "id": "9816ed31-fdf8-4c25-8b17-b411a600b14e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "⏰ DAILY REPORT TRIGGER / SCHEDULE TRIGGER — REPORTE DIARIO\n\nTriggers Block 4 every day at 8am, independent of lead entry.\nDispara el Bloque 4 todos los días a las 8am, independiente de la entrada de leads.",
+        "height": 320,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1744,
+        2976
+      ],
+      "id": "cc56fe07-7bfe-4b99-a6f2-eba9d99a97b6",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VgSnnOer4FRXKGLNZtSNNCQkv3LezpEaBEPUgykeKUU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1051610244,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VgSnnOer4FRXKGLNZtSNNCQkv3LezpEaBEPUgykeKUU/edit#gid=1051610244"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -800,
+        3008
+      ],
+      "id": "7e819393-169d-464a-9edd-c1cf41bf09e3",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1nArEQj7yLh-Ncuc37rgMkqrZi9GQZGcEc8SjjGnOSV8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1764839402,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nArEQj7yLh-Ncuc37rgMkqrZi9GQZGcEc8SjjGnOSV8/edit#gid=1764839402"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -800,
+        3184
+      ],
+      "id": "62e90270-adb4-4372-a827-4f8b02932b48",
+      "name": "Get row(s) in sheet1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19AfyV6pAL_3VW96VpKsp-KPwJQ5M_9-pCAzrPP1jeO0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1974870539,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19AfyV6pAL_3VW96VpKsp-KPwJQ5M_9-pCAzrPP1jeO0/edit#gid=1974870539"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -800,
+        3376
+      ],
+      "id": "4793faee-0cf5-424f-a1aa-246c80cc141d",
+      "name": "Get row(s) in sheet2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📖 READ ALL 3 SYSTEM SHEETS / LEER LOS 3 SHEETS DEL SISTEMA\n\nPulls Leads, Appointments, and Nurturing in parallel. Always Output Data enabled on all 3.\nTrae Leads, Citas y Nutrición en paralelo. Always Output Data activado en los 3.",
+        "height": 720,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        2816
+      ],
+      "id": "6fe6a8f7-a258-4df6-b801-c1d88e7263af",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ayer = $now.minus({ days: 1 }).toFormat('yyyy-MM-dd');\nconst items = $input.all().map(i => i.json);\n\nconst leads = items.filter(i => i.categoria !== undefined);\nconst citas = items.filter(i => i.hora !== undefined && i.nombre_cliente !== undefined);\nconst nutricion = items.filter(i => i.mensaje_nutricion !== undefined);\n\nconst leadsAyer = leads.filter(l => l.fecha_ingreso && l.fecha_ingreso.startsWith(ayer));\nconst citasAyer = citas.filter(c => c.fecha === ayer);\nconst nutricionAyer = nutricion.filter(n => n.fecha_envio === ayer);\n\nconst porCategoria = { caliente: 0, tibio: 0, frio: 0 };\nleadsAyer.forEach(l => { if (porCategoria[l.categoria] !== undefined) porCategoria[l.categoria]++; });\n\nreturn {\n  fecha: ayer,\n  total_leads_hoy: leadsAyer.length,\n  leads_calientes: porCategoria.caliente,\n  leads_tibios: porCategoria.tibio,\n  leads_frios: porCategoria.frio,\n  citas_agendadas_hoy: citasAyer.length,\n  leads_en_nutricion_hoy: nutricionAyer.length,\n  detalle_leads: leadsAyer\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        3152
+      ],
+      "id": "aab69a0e-733d-49db-8814-eeb76d780daa",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        208,
+        3136
+      ],
+      "id": "d78b8078-16d3-4722-9797-2a08ee159b50",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "content": "🔀 MERGE — COMBINE ALL 3 SHEETS / UNIR LOS 3 SHEETS\n\nCombines all 3 outputs into a single array (Append mode, 3 inputs).\nCombina las 3 salidas en un solo array (modo Append, 3 inputs).\nAvoids the bug where only one branch registered as \"executed\" when the Code node connected directly.\nEvita el bug donde solo una rama quedaba \"vista\" como ejecutada al conectar el Code directo.",
+        "height": 448,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        2896
+      ],
+      "id": "cdbddd48-250b-4e43-a66c-20e03c818585",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "content": "🔢 CONSOLIDATE DAILY METRICS / CONSOLIDAR MÉTRICAS DEL DÍA\n\nSplits each dataset by a characteristic column, filters by date, calculates totals.\nSepara cada dataset por columna característica, filtra por fecha, calcula totales.",
+        "height": 416,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        752,
+        2928
+      ],
+      "id": "a9290c82-38f3-40d6-9b4d-f88935c16cc9",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 400,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Eres el asistente de reporting de Clínica Renova. Redacta un resumen ejecutivo breve (máx 5 líneas) para el dueño del negocio, con las métricas del día anterior. Sé directo y accionable — si hay algo que requiera su atención (ej. muchos leads calientes sin agendar), menciónalo. Fecha: {{ $json.fecha }}. Total leads: {{ $json.total_leads_hoy }}. Calientes: {{ $json.leads_calientes }}. Tibios: {{ $json.leads_tibios }}. Fríos: {{ $json.leads_frios }}. Citas agendadas: {{ $json.citas_agendadas_hoy }}. Leads en nutrición: {{ $json.leads_en_nutricion_hoy }}.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1792,
+        3152
+      ],
+      "id": "2743306b-7df8-4c3f-b649-05094faf62ce",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "XLGM3QgueVEsFdgs",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📝 CLAUDE GENERATES EXECUTIVE SUMMARY / CLAUDE GENERA RESUMEN EJECUTIVO\n\nTurns raw metrics into an actionable summary — flags what needs attention.\nConvierte métricas crudas en resumen accionable — señala qué requiere atención.\nUses Sonnet, not Haiku: strategic insight needs better reasoning.\nUsa Sonnet, no Haiku: insight estratégico necesita mejor razonamiento.",
+        "height": 400,
+        "width": 672
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        2944
+      ],
+      "id": "a66c67f8-a53e-4fbe-9d97-cb4d114733d4",
+      "name": "Sticky Note23"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a624e6c-0340-4431-8980-1bbb8ea71902",
+              "name": "resumen_ejecutivo",
+              "value": "={{ $json.content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2528,
+        3152
+      ],
+      "id": "00635a36-8bba-406a-a777-35f3d476699a",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "content": "✂️ EXTRACT EXECUTIVE SUMMARY / EXTRAER RESUMEN EJECUTIVO\n\nPulls the clean text from Claude's response.\nSaca el texto limpio de la respuesta de Claude.",
+        "height": 336,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2384,
+        2992
+      ],
+      "id": "aaa9cceb-fb5c-4534-bbb3-01b6c5b283b8",
+      "name": "Sticky Note24"
+    },
+    {
+      "parameters": {
+        "sendTo": "alejandroarroval@gmail.com",
+        "subject": "=Reporte Diario — Clínica Renova {{ $json.resumen_ejecutivo ? $now.minus({days:1}).format('dd/MM/yyyy') : '' }}",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background-color:#f9f7f5;\">\n  <div style=\"background:linear-gradient(135deg,#c9a876,#8b6f47);padding:24px;border-radius:8px 8px 0 0;\">\n    <h1 style=\"color:#fff;margin:0;font-size:22px;\">✨ Clínica Renova</h1>\n    <p style=\"color:#f0e6d6;margin:4px 0 0;font-size:14px;\">Reporte Ejecutivo Diario</p>\n  </div>\n  <div style=\"background:#fff;padding:24px;border-radius:0 0 8px 8px;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n    <p style=\"color:#999;font-size:13px;margin-top:0;\">📅 {{ $('Code in JavaScript2').item.json.fecha }}</p>\n\n    <div style=\"display:flex;gap:12px;margin:20px 0;flex-wrap:wrap;\">\n      <div style=\"background:#fdf2f2;border-left:4px solid #e74c3c;padding:12px 16px;border-radius:6px;flex:1;min-width:100px;\">\n        <div style=\"font-size:24px;font-weight:bold;color:#e74c3c;\">{{ $('Code in JavaScript2').item.json.leads_calientes }}</div>\n        <div style=\"font-size:12px;color:#666;\">🔥 Calientes</div>\n      </div>\n      <div style=\"background:#fff8ed;border-left:4px solid #e8a33d;padding:12px 16px;border-radius:6px;flex:1;min-width:100px;\">\n        <div style=\"font-size:24px;font-weight:bold;color:#e8a33d;\">{{ $('Code in JavaScript2').item.json.leads_tibios }}</div>\n        <div style=\"font-size:12px;color:#666;\">🌤️ Tibios</div>\n      </div>\n      <div style=\"background:#f0f6fb;border-left:4px solid #5b9bd5;padding:12px 16px;border-radius:6px;flex:1;min-width:100px;\">\n        <div style=\"font-size:24px;font-weight:bold;color:#5b9bd5;\">{{ $('Code in JavaScript2').item.json.leads_frios }}</div>\n        <div style=\"font-size:12px;color:#666;\">❄️ Fríos</div>\n      </div>\n    </div>\n\n    <div style=\"display:flex;gap:12px;margin:20px 0;flex-wrap:wrap;\">\n      <div style=\"background:#f4f9f4;border-left:4px solid #52a852;padding:12px 16px;border-radius:6px;flex:1;min-width:100px;\">\n        <div style=\"font-size:24px;font-weight:bold;color:#52a852;\">{{ $('Code in JavaScript2').item.json.citas_agendadas_hoy }}</div>\n        <div style=\"font-size:12px;color:#666;\">📅 Citas agendadas</div>\n      </div>\n      <div style=\"background:#f5f3fa;border-left:4px solid #8e6fc7;padding:12px 16px;border-radius:6px;flex:1;min-width:100px;\">\n        <div style=\"font-size:24px;font-weight:bold;color:#8e6fc7;\">{{ $('Code in JavaScript2').item.json.leads_en_nutricion_hoy }}</div>\n        <div style=\"font-size:12px;color:#666;\">🌱 En nutrición</div>\n      </div>\n    </div>\n\n    <hr style=\"border:none;border-top:1px solid #eee;margin:24px 0;\">\n\n    <div style=\"line-height:1.7;color:#333;font-size:14px;\">\n      {{ $json.resumen_ejecutivo.replace(/^# (.*)/gm, '').replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>').replace(/\\n\\n/g, '<br><br>').replace(/\\n/g, '<br>') }}\n    </div>\n\n    <p style=\"color:#bbb;font-size:11px;margin-top:32px;text-align:center;\">Generado automáticamente por el sistema de automatización de Clínica Renova</p>\n  </div>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3088,
+        3152
+      ],
+      "id": "5203f10a-fa1c-4d8d-b8d4-52e1ddf30f69",
+      "name": "Send a message",
+      "webhookId": "d12cf836-bb7e-4517-ae4d-9aab2e91b963",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gTmNXvBMnlDjAwZj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📧 SEND REPORT TO OWNER / ENVIAR REPORTE AL DUEÑO\n\nDaily HTML-designed email — converts Claude's markdown to simple HTML.\nEmail diario con diseño HTML — convierte markdown de Claude a HTML simple.",
+        "height": 320,
+        "width": 640
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2928,
+        3008
+      ],
+      "id": "c47b2dd5-42ba-4042-bc4c-52e8e8c03050",
+      "name": "Sticky Note25"
+    },
+    {
+      "parameters": {
+        "content": "💰 BLOCK 5 — BILLING & ROI / BLOQUE 5 — FACTURACIÓN/ROI\n\nRuns weekly. Calculates revenue, operating cost, and ROI. Claude interprets the numbers.\nCorre semanalmente. Calcula ingreso, costo operativo y ROI. Claude interpreta los números.",
+        "height": 240,
+        "width": 928,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        3680
+      ],
+      "id": "1ef4f09c-160a-4c7d-be07-967604781d95",
+      "name": "Sticky Note26"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1184,
+        4144
+      ],
+      "id": "9524299c-4fc2-4df3-b3fe-2251cdd65f6f",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "content": "⏰ WEEKLY ROI TRIGGER / SCHEDULE TRIGGER — ROI SEMANAL\nTriggers Block 5 every Monday at 8am. Independent from the daily report.\nDispara el Bloque 5 cada lunes a las 8am. Flujo independiente del reporte diario.",
+        "height": 304,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        4000
+      ],
+      "id": "0ca86818-cbca-4580-b806-0900a7c9bde4",
+      "name": "Sticky Note27"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1nArEQj7yLh-Ncuc37rgMkqrZi9GQZGcEc8SjjGnOSV8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1764839402,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nArEQj7yLh-Ncuc37rgMkqrZi9GQZGcEc8SjjGnOSV8/edit#gid=1764839402"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -528,
+        4144
+      ],
+      "id": "43501fd4-647f-4509-9f86-c7e5f3c81aac",
+      "name": "Get row(s) in sheet3",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📖 READ BILLED APPOINTMENTS / LEER CITAS CON MONTO FACTURADO\n\nPulls all appointments along with their billed amount.\nTrae todas las citas con su monto_facturado.",
+        "height": 304,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        4000
+      ],
+      "id": "5ab8155d-072f-4cb6-8ff4-7b82d6a8451f",
+      "name": "Sticky Note28"
+    },
+    {
+      "parameters": {
+        "jsCode": "const hoy = $now;\nconst haceUnaSemana = hoy.minus({ days: 7 });\n\nconst citas = $input.all().map(i => i.json).filter(c => c.fecha); // descarta el item vacío de Always Output Data\n\nconst citasSemana = citas.filter(c => {\n  const fechaCita = new Date(c.fecha);\n  return fechaCita >= haceUnaSemana.toJSDate() && fechaCita <= hoy.toJSDate();\n});\n\nconst ingresoTotal = citasSemana.reduce((sum, c) => sum + (Number(c.monto_facturado) || 0), 0);\n\n// Costo operativo estimado fijo mensual / 4 semanas (mismo criterio de P19)\nconst costoOperativoSemanal = 800000; // ajustable: arriendo, insumos, nómina prorrateada\n\nconst roi = costoOperativoSemanal > 0\n  ? (((ingresoTotal - costoOperativoSemanal) / costoOperativoSemanal) * 100).toFixed(1)\n  : 0;\n\nreturn {\n  fecha_reporte: hoy.toFormat('yyyy-MM-dd'),\n  periodo: `${haceUnaSemana.toFormat('yyyy-MM-dd')} a ${hoy.toFormat('yyyy-MM-dd')}`,\n  cantidad_citas_facturadas: citasSemana.length,\n  ingreso_total: ingresoTotal,\n  costo_operativo: costoOperativoSemanal,\n  roi_porcentaje: roi,\n  detalle_citas: citasSemana\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        4144
+      ],
+      "id": "55c0b777-b457-49a0-84b9-8b2fd91f0ddc",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "content": "🔢 CALCULATE WEEKLY ROI / CALCULAR ROI DE LA SEMANA\n\nFilters appointments from the last 7 days, sums revenue, subtracts operating cost, calculates ROI%.\nFiltra citas de los últimos 7 días, suma ingreso, resta costo operativo, calcula ROI%.",
+        "height": 320,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        3984
+      ],
+      "id": "80807432-71b3-4e5f-882b-1458b4d4586b",
+      "name": "Sticky Note29"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-5\",\n  \"max_tokens\": 400,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Eres el asistente financiero de Clínica Renova. Convierte estos números en un resumen ejecutivo breve (máx 5 líneas) para el dueño, en lenguaje de negocio sin tecnicismos. Si el ROI es negativo, sé directo pero constructivo, sugiriendo una causa probable y una acción concreta. Periodo: {{ $json.periodo }}. Citas facturadas: {{ $json.cantidad_citas_facturadas }}. Ingreso total: ${{ $json.ingreso_total }} COP. Costo operativo: ${{ $json.costo_operativo }} COP. ROI: {{ $json.roi_porcentaje }}%. No hagas preguntas de seguimiento ni ofrezcas ayuda adicional al final — este es un reporte automático por email, nadie puede responderte.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        800,
+        4144
+      ],
+      "id": "2e28854c-5de0-4fce-9fb8-cf6de2ac4149",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "XLGM3QgueVEsFdgs",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📝 CLAUDE INTERPRETS THE ROI / CLAUDE INTERPRETA EL ROI\n\nTranslates revenue/cost/ROI into plain business language.\nTraduce ingreso/costo/ROI a lenguaje de negocio simple.\nIf ROI is negative, suggests a probable cause and concrete action.\nSi el ROI es negativo, sugiere causa probable y acción concreta.",
+        "height": 320,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        3984
+      ],
+      "id": "970852a6-0a6b-4991-bd8a-5e9ec6494b40",
+      "name": "Sticky Note30"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f545e16d-a424-4818-975c-4b1591ae809f",
+              "name": "resumen_roi",
+              "value": "={{ $json.content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1504,
+        4144
+      ],
+      "id": "696d0dc7-4b9b-49a3-bbff-9308a35e997b",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "content": "✂️ EXTRACT ROI SUMMARY / EXTRAER RESUMEN DE ROI\n\nPulls the clean text from Claude's interpretation.\nSaca el texto limpio de la interpretación de Claude.",
+        "height": 304,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        4000
+      ],
+      "id": "7e3d00d6-7a3c-4156-b682-b9d3ca2cfedb",
+      "name": "Sticky Note31"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1UCi3x2eT8nmg-T5ktQtqx9Ah2qE5c6CyFxc0R32_FPQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1069594176,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UCi3x2eT8nmg-T5ktQtqx9Ah2qE5c6CyFxc0R32_FPQ/edit#gid=1069594176"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_reporte": "={{ $('Code in JavaScript3').item.json.fecha_reporte }}",
+            "periodo": "={{ $('Code in JavaScript3').item.json.periodo }}",
+            "cantidad_citas_facturadas": "={{ $('Code in JavaScript3').item.json.cantidad_citas_facturadas }}",
+            "ingreso_total": "={{ $('Code in JavaScript3').item.json.ingreso_total }}",
+            "costo_operativo": "={{ $('Code in JavaScript3').item.json.costo_operativo }}",
+            "roi_porcentaje": "={{ $('Code in JavaScript3').item.json.roi_porcentaje }}",
+            "resumen_ejecutivo": "={{ $json.resumen_roi }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_reporte",
+              "displayName": "fecha_reporte",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "periodo",
+              "displayName": "periodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad_citas_facturadas",
+              "displayName": "cantidad_citas_facturadas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ingreso_total",
+              "displayName": "ingreso_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "costo_operativo",
+              "displayName": "costo_operativo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "roi_porcentaje",
+              "displayName": "roi_porcentaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resumen_ejecutivo",
+              "displayName": "resumen_ejecutivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2080,
+        4144
+      ],
+      "id": "a7196b46-a141-4cc0-9110-65cb3e9ee9c6",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 SAVE ROI HISTORY / GUARDAR HISTÓRICO DE ROI\n\nLogs each weekly report to track evolution over time.\nRegistra cada reporte semanal para trackear evolución en el tiempo.\nSheet: P22_ROI_Facturacion_Clinica_Renova.",
+        "height": 304,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        4000
+      ],
+      "id": "fc4b695f-176a-4a52-a970-48e7a5566d3a",
+      "name": "Sticky Note32"
+    },
+    {
+      "parameters": {
+        "sendTo": "alejandroarroval@gmail.com",
+        "subject": "=Reporte Semanal ROI — Clínica Renova {{ $now.format('dd/MM/yyyy') }}",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background-color:#f9f7f5;\">\n  <div style=\"background:linear-gradient(135deg,#c9a876,#8b6f47);padding:24px;border-radius:8px 8px 0 0;\">\n    <h1 style=\"color:#fff;margin:0;font-size:22px;\">✨ Clínica Renova</h1>\n    <p style=\"color:#f0e6d6;margin:4px 0 0;font-size:14px;\">Reporte Semanal de Facturación y ROI</p>\n  </div>\n  <div style=\"background:#fff;padding:24px;border-radius:0 0 8px 8px;box-shadow:0 2px 8px rgba(0,0,0,0.06);\">\n    <p style=\"color:#999;font-size:13px;margin-top:0;\">📅 {{ $('Code in JavaScript3').item.json.periodo }}</p>\n\n    <div style=\"display:flex;gap:12px;margin:20px 0;flex-wrap:wrap;\">\n      <div style=\"background:#f4f9f4;border-left:4px solid #52a852;padding:12px 16px;border-radius:6px;flex:1;min-width:130px;\">\n        <div style=\"font-size:20px;font-weight:bold;color:#52a852;\">${{ $('Code in JavaScript3').item.json.ingreso_total }}</div>\n        <div style=\"font-size:12px;color:#666;\">💵 Ingreso total</div>\n      </div>\n      <div style=\"background:#fdf2f2;border-left:4px solid #e74c3c;padding:12px 16px;border-radius:6px;flex:1;min-width:130px;\">\n        <div style=\"font-size:20px;font-weight:bold;color:#e74c3c;\">${{ $('Code in JavaScript3').item.json.costo_operativo }}</div>\n        <div style=\"font-size:12px;color:#666;\">💸 Costo operativo</div>\n      </div>\n    </div>\n\n    <div style=\"background:{{ Number($('Code in JavaScript3').item.json.roi_porcentaje) >= 0 ? '#f4f9f4' : '#fdf2f2' }};border-left:4px solid {{ Number($('Code in JavaScript3').item.json.roi_porcentaje) >= 0 ? '#52a852' : '#e74c3c' }};padding:16px;border-radius:6px;margin:20px 0;\">\n      <div style=\"font-size:28px;font-weight:bold;color:{{ Number($('Code in JavaScript3').item.json.roi_porcentaje) >= 0 ? '#52a852' : '#e74c3c' }};\">{{ $('Code in JavaScript3').item.json.roi_porcentaje }}%</div>\n      <div style=\"font-size:12px;color:#666;\">📊 ROI de la semana | {{ $('Code in JavaScript3').item.json.cantidad_citas_facturadas }} citas facturadas</div>\n    </div>\n\n    <hr style=\"border:none;border-top:1px solid #eee;margin:24px 0;\">\n\n    <div style=\"line-height:1.7;color:#333;font-size:14px;\">\n      {{ $json.resumen_roi.replace(/^# (.*)/gm, '').replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>').replace(/\\n\\n/g, '<br><br>').replace(/\\n/g, '<br>') }}\n    </div>\n\n    <p style=\"color:#bbb;font-size:11px;margin-top:32px;text-align:center;\">Generado automáticamente por el sistema de automatización de Clínica Renova</p>\n  </div>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2816,
+        4144
+      ],
+      "id": "22eec493-3ec1-48d4-99d1-21ff91a81567",
+      "name": "Send a message1",
+      "webhookId": "4583a72f-b759-41e8-88b9-60e5b7f0eb3d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gTmNXvBMnlDjAwZj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📧 SEND ROI REPORT TO OWNER / ENVIAR REPORTE DE ROI AL DUEÑO\n\nWeekly email — ROI highlighted in green or red depending on whether it's positive or negative.\nEmail semanal — ROI destacado en verde o rojo según sea positivo o negativo.",
+        "height": 320,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2624,
+        3984
+      ],
+      "id": "5885aef2-66fb-42d0-ba12-d3b992253bba",
+      "name": "Sticky Note33"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "67uiD4LqbWh1Wja1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "f2ef6a4f-290f-4bf2-bba3-8512ad205645",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad71c5258db3ecec46cfbe0407ab958981cfdc96a9b91ef604ec3c3ea533e7e0"
+  },
+  "nodeGroups": [],
+  "id": "aUcQE4BQhWs4TxP6",
+  "tags": []
+}
