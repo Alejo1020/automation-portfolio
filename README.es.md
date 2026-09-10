@@ -14,7 +14,7 @@ Casos de estudio profundos, listos para mostrar a un cliente o reclutador serio.
 
 | Proyecto | Descripción | Estado |
 |---|---|---|
-| [P22 — Clínica Renova](./P22%20—%20End-to-End%20Service%20Renova%20Clinic/) | Automatización end-to-end de un negocio de servicios: captación de leads, calificación con IA, agendamiento, nutrición, reporting al dueño, ROI y monitoreo de errores — 6 bloques integrados. | ✅ Completo |
+| [P22 — Clínica Renova](./P22%20—%20%20End-to-End%20Service%20Renova%20Clinic) | Automatización end-to-end de un negocio de servicios: captación de leads, calificación con IA, agendamiento, nutrición, reporting al dueño, ROI y monitoreo de errores — 6 bloques integrados. | ✅ Completo |
 | P23 — Sistema de Agendamiento + Pago | Landing page (Cloudflare Pages) + checkout Stripe + confirmación por WhatsApp, en producción real. | ✅ Completo |
 | P24 — Hub de Atención Omnicanal | WhatsApp + Email unificados, enrutados con IA a agentes de Ventas/Soporte/General. | ✅ Completo |
 
