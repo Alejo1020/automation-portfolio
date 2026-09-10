@@ -21,12 +21,6 @@ A fully automated weekly report that lands in the owner's inbox every Monday mor
 
 Estimated time saved: ~45 min/week of manual review (~3 hours/month) per business, plus fewer leads lost to inconsistent follow-up. Report generation and delivery is fully hands-off once configured.
 
-## How This Sells
-
-- **Target client:** small service businesses (clinics, agencies, real estate, local commerce) with a lead-capture channel already in place but no reporting discipline.
-- **Price range:** $50–100 USD setup fee as a standalone deliverable.
-- **Upsell:** bundles naturally with P1 (WhatsApp lead notifier) into a "Lead Follow-up System" package — higher ticket, same core stack.
-
 ## Tech Stack
 
 n8n (self-hosted, Docker/Ubuntu) · Google Sheets API · Gmail API · JavaScript (Code node)
