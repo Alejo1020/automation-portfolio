@@ -31,9 +31,6 @@ lead data     WhatsApp text        notification
 
 *"How many leads are you losing because no one reached out in time? This system alerts your sales team over WhatsApp the second a new lead comes in."*
 
-- **Target client:** real estate agencies, car dealerships, medical/dental/aesthetic clinics, law firms — any business with web forms and a sales team
-- **Price range:** $150–300 USD one-time setup + $30–50 USD/month maintenance, or bundled into a larger package (e.g. combined with an AI lead-qualification system)
-- **Demo tip:** send a live test lead during the sales call — the client sees the WhatsApp notification arrive in real time, which is highly persuasive
 
 ## Tech Stack
 
