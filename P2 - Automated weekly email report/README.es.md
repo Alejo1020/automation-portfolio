@@ -21,12 +21,6 @@ Un reporte semanal totalmente automático que llega al correo del dueño cada lu
 
 Tiempo ahorrado estimado: ~45 min/semana de revisión manual (~3 horas/mes) por negocio, además de menos leads perdidos por seguimiento inconsistente. La generación y envío del reporte queda completamente automatizada una vez configurado.
 
-## Cómo Se Vende
-
-- **Cliente target:** negocios de servicios pequeños (clínicas, agencias, inmobiliarias, comercio local) que ya tienen un canal de captación de leads pero sin disciplina de reporting.
-- **Rango de precio:** $50–100 USD de setup fee como entregable independiente.
-- **Upsell:** se combina naturalmente con P1 (notificador de leads por WhatsApp) en un paquete "Sistema de Seguimiento de Leads" — mayor ticket, mismo stack base.
-
 ## Tech Stack
 
 n8n (self-hosted, Docker/Ubuntu) · Google Sheets API · Gmail API · JavaScript (nodo Code)
