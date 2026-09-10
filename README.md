@@ -16,7 +16,7 @@ Deep, client-ready case studies — the projects to show a serious prospect or r
 
 | Project | Description | Status |
 |---|---|---|
-| [P22 — Clínica Renova](./P22%20—%20End-to-End%20Service%20Renova%20Clinic/) | End-to-end automation for a service business: lead capture, AI qualification, scheduling, nurturing, owner reporting, ROI tracking, and error monitoring — 6 integrated blocks. | ✅ Complete |
+| [P22 — Clínica Renova](./P22%20—%20%20End-to-End%20Service%20Renova%20Clinic) | End-to-end automation for a service business: lead capture, AI qualification, scheduling, nurturing, owner reporting, ROI tracking, and error monitoring — 6 integrated blocks. | ✅ Complete |
 | P23 — Scheduling + Payment System | Landing page (Cloudflare Pages) + Stripe checkout + WhatsApp confirmation, live in production. | ✅ Complete |
 | P24 — Omnichannel Support Hub | WhatsApp + Email unified, AI-routed to Sales/Support/General agents. | ✅ Complete |
 
