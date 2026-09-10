@@ -1,0 +1,135 @@
+{
+  "name": "P1 - Notificador de leads por WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-nuevo",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-160, -400],
+      "webhookId": "lead-nuevo",
+      "id": "aa494f09-1088-4e6d-9ec2-67cb4a7dfc49"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "88d9112a-a836-4166-863c-f7c6933796e7",
+              "name": "mensaje_whatsapp",
+              "value": "=Nuevo lead: {{ $json.body.nombre }}\nTel: {{ $json.body.telefono }}\nMensaje: {{ $json.body.mensaje }}\nOrigen: {{ $json.body.origen }}",
+              "type": "string"
+            },
+            {
+              "id": "08e9b2b3-27c0-487e-9f71-55975efae197",
+              "name": "telefono_destino",
+              "value": "={{ $json.body.telefono }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [560, -400],
+      "id": "47dca8ff-abf5-490a-bc24-38066ced6d8e"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+57{{ $json.telefono_destino }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.mensaje_whatsapp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1296, -400],
+      "id": "1ffda3ae-ef22-4f9f-849b-980eb5c52846",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 1. Receive the Lead\nWebhook that captures incoming lead data from a web form\nor landing page: name, phone, message, and source.\n\n## 1. Recibe el lead\nWebhook que captura los datos del lead entrante desde un\nformulario web o landing page: nombre, teléfono, mensaje y origen.",
+        "height": 368,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-288, -640],
+      "id": "e450ebe8-c1fb-4b2a-ac26-74d9a5d72654",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 2. Build the Message\nCombines the lead data into a single WhatsApp-ready text\nand isolates the destination phone number.\n\n## 2. Arma el mensaje\nCombina los datos del lead en un solo texto listo para\nWhatsApp y separa el número de teléfono destino.",
+        "height": 384,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [384, -640],
+      "id": "24edcfaa-1c71-42ba-9fd1-b052ab1f7472",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 3. Send via WhatsApp\nCalls the Twilio API to notify the sales rep in real time.\nRequires an active WhatsApp sandbox (recipient must \"join\" first).\n\n## 3. Envía por WhatsApp\nLlama a la API de Twilio para notificar al vendedor en\ntiempo real. Requiere sandbox activo (el destinatario debe\nhaber hecho \"join\" antes).",
+        "height": 400,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1056, -656],
+      "id": "0e908a40-0848-47cb-b7a5-f4a953f0c1c1",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]]
+    },
+    "Edit Fields": {
+      "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
