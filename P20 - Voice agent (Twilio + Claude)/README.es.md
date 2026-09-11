@@ -33,17 +33,11 @@ continuar → vuelve a escuchar (loop) | despedir → cuelga | transferir → ma
 
 Prueba en vivo verificada de punta a punta: el agente saludó, entendió una pregunta hablada sobre horarios de atención, y — en un turno posterior — recordó correctamente el nombre del usuario sin que se lo repitieran, confirmado en el log de conversación guardado en Google Sheets.
 
-## Cómo se vende esto
-
 *"Tu negocio nunca más pierde una llamada. Este agente contesta 24/7, entiende lo que le preguntan, recuerda el contexto de la conversación, y sabe cuándo pasarte la llamada a vos porque el cliente ya está listo para cerrar — o cuándo despedirse solo porque la consulta ya quedó resuelta. No es un IVR de menú numérico: es una conversación real."*
-
-**A quién se le vende:** negocios con volumen de llamadas que no pueden justificar recepción full-time — clínicas, talleres, inmobiliarias, despachos legales chicos.
-
-**Modelo de cobro:** setup inicial + tarifa mensual que incluye minutos de llamada de Twilio (se traslada al cliente, no se absorbe del margen).
 
 ## Stack técnico
 
-n8n (self-hosted) · Claude API (Haiku 4.5) · Twilio Programmable Voice · Google Sheets · Cloudflare Tunnel
+n8n · Claude API (Haiku 4.5) · Twilio Programmable Voice · Google Sheets · Cloudflare Tunnel
 
 ## Aprendizajes técnicos clave
 
