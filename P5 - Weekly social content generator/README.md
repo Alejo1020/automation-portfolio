@@ -40,12 +40,6 @@ Update row in sheet   ──> writes both posts + status back, matched by date
 - Estimated time saved: ~5–8 hours/month a small business would otherwise spend writing posts.
 - No human intervention needed once the topic calendar is loaded.
 
-## How This Sells
-
-- **Setup fee**: building the system + a custom 30-day content calendar for the client's business.
-- **Recurring**: monthly maintenance (reloading topics, tone/brand adjustments) or upsell to a full "AI content management" retainer.
-- **Best pitched bundled** with lead-capture and qualification systems (P1, P2, P4) as a complete "lead capture + qualification + content" package, not a standalone tool.
-- Target clients: local service businesses with recurring leads (real estate, dealerships, legal firms) that need both fast lead response and consistent social presence.
 
 ## Tech Stack
 
