@@ -31,15 +31,12 @@ Los deals se cargan manualmente en un Google Sheet en vez de traerse de un CRM �
 - Claude Sonnet detectó por sí solo un riesgo real de negocio — concentración del 100% de ingresos en un solo cliente — algo que un modelo más económico (Haiku) no señaló en la misma prueba
 - Construye un histórico buscable y fechado de resultados en Sheets — un trackrecord que le podés mostrar al cliente en cualquier momento
 
-## Cómo Se Vende
-
 *"Además de automatizar tu captación de leads, te entrego un reporte financiero semanal: cuánto generó el sistema, cuánto costó operarlo, y una recomendación en lenguaje simple — no un dashboard técnico que nadie lee. Podés ver en cualquier momento si la automatización se está pagando sola, y yo tengo evidencia concreta para seguir optimizando tu cuenta."*
 
-Se vende como add-on de $200-400/mes sobre cualquier paquete existente, o como parte de un paquete completo ($2,500-4,500+/mes) — es la pieza que convierte "tengo un bot" en "tengo un sistema con ROI medible".
 
 ## Stack Técnico
 
-n8n (self-hosted, Docker) · Claude API (Sonnet 5) · Google Sheets · Gmail
+n8n · Claude API (Sonnet 5) · Google Sheets · Gmail
 
 ## Aprendizajes Técnicos Clave
 
