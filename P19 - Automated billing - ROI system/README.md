@@ -31,15 +31,12 @@ Deals are logged manually in a Google Sheet rather than pulled from a CRM — a 
 - Claude Sonnet flagged a real business risk on its own — 100% revenue concentration in a single client — something a cheaper model (Haiku) did not surface in the same test
 - Builds a searchable, dated history of results in Sheets — a track record you can show a client at any time
 
-## How This Sells
-
 *"On top of automating your lead capture, you get a weekly financial report: how much the system generated, how much it cost to run, and a plain-language recommendation — not a technical dashboard nobody reads. You can see at any moment whether the automation is paying for itself, and I have hard evidence to keep optimizing your account."*
 
-Sells as a $200–400/month add-on to any existing automation package, or as part of a full-service package ($2,500–4,500+/month) — it's the piece that turns "I have a bot" into "I have a system with measurable ROI."
 
 ## Tech Stack
 
-n8n (self-hosted, Docker) · Claude API (Sonnet 5) · Google Sheets · Gmail
+n8n · Claude API (Sonnet 5) · Google Sheets · Gmail
 
 ## Key Technical Learnings
 
