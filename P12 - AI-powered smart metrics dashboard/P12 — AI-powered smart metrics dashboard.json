@@ -1,0 +1,478 @@
+{
+  "name": "P12 — AI-powered smart metrics dashboard",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -480,
+        -64
+      ],
+      "id": "65232e7a-3c9a-4214-8756-d266e87678c6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "📅 SCHEDULE TRIGGER\nTriggers the intelligent analysis every Monday 8am.\nSimulates the \"automatic weekly report\" the business\nowner receives without asking for it.\n\n📅 SCHEDULE TRIGGER (ES)\nDispara el análisis inteligente cada lunes 8am.\nSimula el \"informe semanal automático\" que\nrecibiría el dueño del negocio sin pedirlo.",
+        "height": 384,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -304
+      ],
+      "id": "49f26704-4881-4576-8228-413b11439a22",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1wXySz3cCdOvhPE68Z4x-JGm7IuG2Sohy9I_CCSIeqhU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 460654077,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wXySz3cCdOvhPE68Z4x-JGm7IuG2Sohy9I_CCSIeqhU/edit#gid=460654077"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        -64
+      ],
+      "id": "124ea072-a5bc-4b83-acd2-fd64f7e89fd7",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📊 FETCH METRICS\nReads 8 weeks of business metrics (leads, sales,\nrevenue, spend, satisfaction, tickets). Pulls the full\nhistory so the AI detects trends, not a single data point.\n\n📊 TRAER MÉTRICAS (ES)\nLee las 8 semanas de métricas del negocio\n(leads, ventas, ingreso, gasto, satisfacción, tickets).\nTrae el histórico completo para que la IA\ndetecte tendencias, no solo un dato suelto.",
+        "height": 400,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -320
+      ],
+      "id": "1f759822-5194-44bb-aca3-9cab9358f9f3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "metricas",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -64
+      ],
+      "id": "c1960481-837f-4278-874f-52b14a8f5599",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "content": "📦 AGGREGATE\nMerges the 8 weeks into a single array.\nNeeded so Claude sees the full history and\ndetects trend, instead of analyzing week by week.\n\n📦 AGGREGATE (ES)\nJunta las 8 semanas en un solo array.\nNecesario para que Claude vea el histórico completo\ny detecte tendencia, no analice semana por semana.",
+        "height": 400,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -320
+      ],
+      "id": "d5785b8e-5bcf-4b4c-a9ef-a98b567a5d18",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"claude-sonnet-5\",\n  max_tokens: 1000,\n  messages: [{\n    role: \"user\",\n    content: \"Eres un consultor de negocios senior. Analiza estas métricas semanales de un negocio de servicios y devuelve SOLO JSON así: {\\\"diagnostico\\\": \\\"resumen breve de la tendencia general\\\", \\\"alerta_principal\\\": \\\"el problema más urgente a atender\\\", \\\"recomendaciones\\\": [\\\"acción concreta 1\\\", \\\"acción concreta 2\\\", \\\"acción concreta 3\\\"]}. Sin texto adicional, sin markdown, sin backticks. Datos: \" + JSON.stringify($json.metricas)\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1280,
+        -64
+      ],
+      "id": "514a56e4-5531-4a7a-bd2f-c7e75f283ef4",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "LQyEArLzg0pmjClm",
+          "name": "Twilio"
+        },
+        "httpHeaderAuth": {
+          "id": "XLGM3QgueVEsFdgs",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 CLAUDE API — ANALYSIS + RECOMMENDATIONS\nAnalyzes the 8-week history and returns a diagnosis,\nmain alert, and 3 concrete actions. Final portfolio\nversion — uses real Claude API, not Gemini free tier.\nThis is what gets shown to a client/employer as a sales case.\n\n🤖 CLAUDE API — ANÁLISIS + RECOMENDACIONES (ES)\nAnaliza el histórico de 8 semanas y devuelve\ndiagnóstico, alerta principal y 3 acciones concretas.\nVersión final de portafolio — usa Claude API real,\nno Gemini free tier. Esto es lo que se le muestra\na un cliente/empleador como caso de venta.",
+        "height": 464,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -368
+      ],
+      "id": "41514bfa-d04c-44cb-bdff-a361bfb83027",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "83dd491d-c0f9-482b-8af2-cd75964d47f3",
+              "name": "fecha_analisis",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "937fd8e0-8a42-4c7a-a047-c6edb067006d",
+              "name": "analisis_raw",
+              "value": "={{ $json.content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -592,
+        480
+      ],
+      "id": "9a475fcb-6f70-4229-9b50-455ac68f839e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "✂️ EXTRACT CLAUDE RESPONSE\nPulls the JSON text out of content[0].text.\nAfter an HTTP Request node, $json resets —\nso we extract straight from $json, not from earlier nodes.\n\n✂️ EXTRAER RESPUESTA DE CLAUDE (ES)\nSaca el texto JSON de content[0].text.\nDespués de un HTTP Request el JSON se resetea —\npor eso extraemos directo de $json, no de nodos previos.",
+        "height": 448,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        192
+      ],
+      "id": "bec453cc-b439-4412-ba4f-381ee0841f98",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($input.first().json.analisis_raw);\n\nreturn [{\n  json: {\n    fecha_analisis: $input.first().json.fecha_analisis,\n    diagnostico: parsed.diagnostico,\n    alerta_principal: parsed.alerta_principal,\n    recomendaciones: parsed.recomendaciones.join(' | ')\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        480
+      ],
+      "id": "c0a5062e-efe1-480c-8007-67b2c126b887",
+      "name": "Code — parsear el JSON de Claude"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PARSE CLAUDE'S JSON\nConverts the JSON string (diagnosis, alert,\nrecommendations) into separate fields ready\nfor Sheets. Recommendations are joined with \" | \"\nbecause Sheets doesn't handle arrays well.\n\n🔧 PARSEAR JSON DE CLAUDE (ES)\nConvierte el string JSON (diagnóstico, alerta,\nrecomendaciones) en campos separados listos\npara Sheets. Recomendaciones se unen con \" | \"\nporque Sheets no maneja bien arrays.",
+        "height": 448,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        192
+      ],
+      "id": "ba7e0d62-6e85-4591-809c-663214952dab",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wXySz3cCdOvhPE68Z4x-JGm7IuG2Sohy9I_CCSIeqhU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1272699615,
+          "mode": "list",
+          "cachedResultName": "Historial_Analisis",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wXySz3cCdOvhPE68Z4x-JGm7IuG2Sohy9I_CCSIeqhU/edit#gid=1272699615"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_analisis": "={{ $json.fecha_analisis }}",
+            "diagnostico": "={{ $json.diagnostico }}",
+            "alerta_principal": "={{ $json.alerta_principal }}",
+            "recomendaciones": "={{ $json.recomendaciones }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_analisis",
+              "displayName": "fecha_analisis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "diagnostico",
+              "displayName": "diagnostico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alerta_principal",
+              "displayName": "alerta_principal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recomendaciones",
+              "displayName": "recomendaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        480
+      ],
+      "id": "30603133-8d54-4e3c-a500-f643ac11f087",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 SAVE ANALYSIS HISTORY\nAppends each weekly analysis with its date.\nThis is the \"AI consulting history\" shown to the\nclient as evidence of ongoing value — not a one-off\nanalysis, but continuous tracking.\n\n💾 GUARDAR HISTORIAL DE ANÁLISIS (ES)\nAppend de cada análisis semanal con fecha.\nEs el \"historial de consultoría IA\" que se le\nmuestra al cliente como evidencia de valor\ncontinuo — no un análisis suelto, sino seguimiento.",
+        "height": 448,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        192
+      ],
+      "id": "8f325266-c023-49c4-ab4d-2798a73dd0e2",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "sendTo": "alejandroarroval@gmail.com",
+        "subject": "=📊 Análisis Semanal Inteligente — {{ $json.fecha_analisis }}",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;font-size:15px;\">\n  <h2 style=\"color:#0f3460;border-bottom:2px solid #0f3460;padding-bottom:10px;font-size:22px;\">\n    📊 Análisis Inteligente de Negocio\n  </h2>\n  <p style=\"color:#666;font-size:14px;\">Fecha: {{ $json.fecha_analisis }}</p>\n  \n  <h3 style=\"color:#1a1a2e;font-size:18px;\">Diagnóstico</h3>\n  <p style=\"line-height:1.7;color:#333;font-size:15px;\">{{ $json.diagnostico }}</p>\n  \n  <h3 style=\"color:#c0392b;font-size:18px;\">⚠️ Alerta Principal</h3>\n  <p style=\"line-height:1.7;color:#333;background:#fdf2f2;padding:14px;border-left:4px solid #c0392b;font-size:15px;\">{{ $json.alerta_principal }}</p>\n  \n  <h3 style=\"color:#1a1a2e;font-size:18px;\">Recomendaciones Accionables</h3>\n  <ul style=\"line-height:1.9;color:#333;font-size:15px;\">\n    {{ $json.recomendaciones.split(' | ').map(r => `<li>${r}</li>`).join('') }}\n  </ul>\n  \n  <p style=\"color:#999;font-size:13px;margin-top:30px;\">Generado automáticamente por sistema de análisis IA</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        480
+      ],
+      "id": "828d3991-202c-46ca-a2e7-c1b250b2e6a8",
+      "name": "Send a message",
+      "webhookId": "9d004b04-8e30-4d43-a761-bd4661befa5b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gTmNXvBMnlDjAwZj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📧 SEND REPORT TO OWNER\nSends diagnosis + alert + recommendations as\nformatted HTML. Simulates automatic weekly delivery —\nthis is what replaces a human analyst reading Sheets\nand writing up the summary.\n\n📧 ENVIAR REPORTE AL DUEÑO (ES)\nManda diagnóstico + alerta + recomendaciones\nen HTML formateado. Simula la entrega automática\nsemanal — esto es lo que reemplaza a un analista\nhumano leyendo Sheets y armando el resumen.",
+        "height": 448,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        192
+      ],
+      "id": "151822fd-216e-44c3-95b5-50d0c5a92222",
+      "name": "Sticky Note7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code — parsear el JSON de Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — parsear el JSON de Claude": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d4af7178-6259-4c4f-b59e-02ee60278ad1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad71c5258db3ecec46cfbe0407ab958981cfdc96a9b91ef604ec3c3ea533e7e0"
+  },
+  "nodeGroups": [],
+  "id": "OWl6PF6fg6gRC2DV",
+  "tags": []
+}
