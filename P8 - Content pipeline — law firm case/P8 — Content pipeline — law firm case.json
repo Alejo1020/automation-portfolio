@@ -1,0 +1,446 @@
+{
+  "name": "P8 — Content pipeline — law firm case",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -816,
+        -112
+      ],
+      "id": "25f70126-f12a-4b95-aeb9-6e08b86fb727",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "📅 SCHEDULE TRIGGER\nFires every Monday 8am. Generates the week's content for Restrepo & Asociados.\n\nDispara cada lunes 8am. Genera el contenido de la semana para Restrepo & Asociados.",
+        "height": 304,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        -288
+      ],
+      "id": "6c5fd57f-e0e7-467f-bd39-817611e82299",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1mJfgRPD9doJP99KRi2uMYB6y_a6kg1ndNAq418gn74M",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 984045513,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mJfgRPD9doJP99KRi2uMYB6y_a6kg1ndNAq418gn74M/edit#gid=984045513"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Estado"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -240,
+        -112
+      ],
+      "id": "535b7d33-cf71-4084-a1eb-c6adc2c1fed8",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PLACEHOLDER_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📊 READ PENDING TOPICS\nFetches rows where Estado is empty. These are the week's topics with no content generated yet.\n\nLEER TEMAS PENDIENTES\nTrae las filas donde Estado está vacío. Son los temas de la semana sin contenido generado aún.",
+        "height": 336,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -304
+      ],
+      "id": "07de7bf7-9a8f-4ab8-93da-70ef72e2a2ef",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PREPARE TOPIC\nExtracts Fecha and Tema from each pending row. Passes it clean to Gemini for content generation.\n\nPREPARAR TEMA\nExtrae Fecha y Tema de cada fila pendiente. Pasa limpio a Gemini para generar el contenido.",
+        "height": 336,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -304
+      ],
+      "id": "c19882e2-20a5-4d54-a85b-eb91df0e48bc",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text: \"Eres un experto en marketing legal para firmas de abogados. Tema: \" + $json.Tema + \". Genera 3 contenidos distintos sobre este tema para la firma Restrepo & Asociados: 1) Post Instagram (casual, con emojis, máx 150 palabras), 2) Post LinkedIn (profesional, sin emojis excesivos, máx 200 palabras), 3) Artículo SEO (800-1000 palabras, con subtítulos, para blog de la firma). Responde SOLO en JSON así: {\\\"post_ig\\\": \\\"...\\\", \\\"post_linkedin\\\": \\\"...\\\", \\\"articulo_seo\\\": \\\"...\\\"}, sin texto adicional ni markdown ni backticks.\"\n    }]\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1008,
+        -112
+      ],
+      "id": "169aa8d7-293c-4ebd-a893-f9d9c9499954",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PLACEHOLDER_GEMINI_HEADER_AUTH_ID",
+          "name": "Gemini API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 GENERATE CONTENT WITH GEMINI\nGenerates 3 pieces per topic: IG post, LinkedIn post, SEO article (800-1000 words). Free tier — test data only. Retry enabled for rate limits.\n\nGENERAR CONTENIDO CON GEMINI\nGenera 3 piezas por tema: post IG, post LinkedIn, artículo SEO (800-1000 palabras). Free tier — solo datos ficticios. Retry activado por saturación.",
+        "height": 368,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        752,
+        -336
+      ],
+      "id": "e8a25ce7-0602-41fc-9e27-1acec9dcc585",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a285539-4431-4a56-bfc9-a5ca0c6371df",
+              "name": "resultado_limpio",
+              "value": "={{ $json.candidates[0].content.parts[0].text.replace('```json', '').replace('```', '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -656,
+        432
+      ],
+      "id": "9916ee6b-15b0-483a-bfa4-5947e820c155",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "🔧 CLEAN GEMINI RESPONSE\nStrips markdown backticks that sometimes wrap the response. Leaves pure JSON ready to parse.\n\nLIMPIAR RESPUESTA GEMINI\nQuita backticks de markdown que a veces vienen en la respuesta. Deja el JSON puro listo para parsear.",
+        "height": 368,
+        "width": 534
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        224
+      ],
+      "id": "344b5848-6713-492f-92b3-ba0e527e8fcb",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($json.resultado_limpio);\n\nreturn {\n  Fecha: $('Preparar Tema').item.json.Fecha,\n  Tema: $('Preparar Tema').item.json.Tema,\n  Post_IG: parsed.post_ig,\n  Post_LinkedIn: parsed.post_linkedin,\n  Articulo_SEO: parsed.articulo_seo,\n  Estado: 'Generado'\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        432
+      ],
+      "id": "5f3c216f-91fd-4de3-b361-42b2a65b7338",
+      "name": "Code in JavaScript (parsear + armar fila final)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  Fecha: $json.Fecha,\n  Tema: $json.Tema\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -112
+      ],
+      "id": "7fc8ae0c-8b82-4e0f-95dd-f1f67ea6535b",
+      "name": "Preparar Tema"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PARSE AND BUILD FINAL ROW\nExtracts post_ig, post_linkedin, articulo_seo from Gemini's JSON. Builds the object ready to update the Sheet with Estado = \"Generado\".\n\nPARSEAR Y ARMAR FILA FINAL\nExtrae post_ig, post_linkedin, articulo_seo del JSON de Gemini. Arma objeto listo para actualizar el Sheet con Estado = \"Generado\".",
+        "height": 368,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        224
+      ],
+      "id": "b1be0a7d-4eb5-462d-96e4-4d80238f5a4f",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1mJfgRPD9doJP99KRi2uMYB6y_a6kg1ndNAq418gn74M",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 984045513,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mJfgRPD9doJP99KRi2uMYB6y_a6kg1ndNAq418gn74M/edit#gid=984045513"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $json.Fecha }}",
+            "Post_IG": "={{ $json.Post_IG }}",
+            "Post_LinkedIn": "={{ $json.Post_LinkedIn }}",
+            "Articulo_SEO": "={{ $json.Articulo_SEO }}",
+            "Estado": "={{ $json.Estado }}"
+          },
+          "matchingColumns": [
+            "Fecha"
+          ],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tema",
+              "displayName": "Tema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post_IG",
+              "displayName": "Post_IG",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post_LinkedIn",
+              "displayName": "Post_LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Articulo_SEO",
+              "displayName": "Articulo_SEO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        784,
+        432
+      ],
+      "id": "46da22b4-ad24-4694-b963-051fe20beb35",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PLACEHOLDER_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 UPDATE SHEET\nMatches the row by Fecha and overwrites Post_IG, Post_LinkedIn, Articulo_SEO, and Estado. Closes the weekly generation cycle.\n\nACTUALIZAR SHEET\nBusca la fila por Fecha y sobreescribe Post_IG, Post_LinkedIn, Articulo_SEO y Estado. Cierra el ciclo de generación semanal.",
+        "height": 384,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        208
+      ],
+      "id": "eaf67062-06ca-4cf0-82f9-da63183cc310",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Preparar Tema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (parsear + armar fila final)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Tema": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (parsear + armar fila final)": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c65f8c2c-f739-464c-9f46-08590bc7b91f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "PLACEHOLDER_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "ogqxOjt3ntTUn7lK",
+  "tags": []
+}
