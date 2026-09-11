@@ -42,7 +42,6 @@ Proyectos base y de nivel medio — desde fundamentos de n8n hasta sistemas mult
 | P18 | Integración CRM real (HubSpot) | ✅ Completo |
 | P19 | Sistema de facturación/ROI automático | ✅ Completo |
 | P20 | Voice agent (Twilio + Claude) | ✅ Completo |
-| P21 | Caso de estudio cliente real end-to-end | ✅ Completo |
 
 ---
 
