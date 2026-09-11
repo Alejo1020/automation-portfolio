@@ -34,19 +34,12 @@ Telegram Send Message (respuesta unificada al cliente)
 - El bot nunca inventa una confirmación falsa: si una herramienta falla, lo admite y ofrece alternativa (comportamiento verificado en pruebas).
 - Arquitectura agnóstica de canal: hoy corre en Telegram, migrar a WhatsApp/Twilio es un swap de un solo nodo de entrada/salida — la lógica de agentes no cambia.
 
-## Cómo se vende esto
+*"Un sistema de atención por WhatsApp/Telegram con 3 especialistas de IA (ventas, agendamiento y soporte) que se pasan la conversación entre sí sin que el cliente repita nada, y que agenda o modifica citas directamente en tu sistema — no solo responde preguntas, ejecuta acciones."*
 
-**Pitch corto:** *"Un sistema de atención por WhatsApp/Telegram con 3 especialistas de IA (ventas, agendamiento y soporte) que se pasan la conversación entre sí sin que el cliente repita nada, y que agenda o modifica citas directamente en tu sistema — no solo responde preguntas, ejecuta acciones."*
-
-**A quién:** clínicas, concesionarios, firmas legales — cualquier negocio con flujo de citas + consultas comerciales + reclamos ocasionales.
-
-**Argumento de venta fuerte:** la arquitectura de modelo mixto (Haiku para lo simple, Sonnet para lo que requiere razonamiento con tools) demuestra conciencia de costo operativo, no solo "hacer que funcione" — eso diferencia a un automatizador junior de un AI Automation Engineer.
-
-**Precio de referencia:** este tipo de sistema (multi-agente + integración de agenda) se ubica en el rango alto de un paquete de automatización — sugerido $400-700 USD de setup + retainer mensual por ajustes de prompts/mantenimiento.
 
 ## Tech Stack
 
-n8n (self-hosted, Docker) · Claude API (Sonnet 5 + Haiku 4.5) · Telegram Bot API · Google Sheets · Cloudflare Tunnel
+n8n · Claude API (Sonnet 5 + Haiku 4.5) · Telegram Bot API · Google Sheets · Cloudflare Tunnel
 
 ## Aprendizajes técnicos clave
 
