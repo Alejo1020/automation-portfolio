@@ -36,13 +36,6 @@ Each week, the workflow pulls campaign data, computes the efficiency metrics tha
 
 In the test scenario (5 simulated campaigns for a car dealership), the analysis flagged a **4.6x difference in cost-per-acquisition** between the best and worst performing campaigns ($14,545 vs $67,778). Reallocating that budget toward the efficient campaign represents the potential to roughly double lead volume without any additional spend.
 
-## How This Sells
-
-- **Target client:** small-to-mid businesses running Meta Ads without a dedicated marketing analyst (dealerships, clinics, real estate, local services).
-- **Setup fee:** $150–300 USD (integration with the client's real Meta Ads account, Sheets, and email).
-- **Monthly retainer:** $80–150 USD/month (maintenance + prompt tuning per business category).
-- **Pitch:** *"I'm not selling you another dashboard. I'm giving you a marketing analyst that reviews your campaigns every week and tells you, in plain language, where you're wasting money."*
-- Natural upsell path toward a full lead-gen system (multi-channel intake + AI qualification + reporting).
 
 ## Tech Stack
 
