@@ -1,0 +1,607 @@
+{
+  "name": "P20 — Voice agent (Twilio + Claude)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "voice-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -768,
+        -400
+      ],
+      "id": "bfc0fa90-d59b-4c34-9057-45c1752af461",
+      "name": "Webhook",
+      "webhookId": "3612d539-081e-4bd9-bf7f-ee3c5dd59948"
+    },
+    {
+      "parameters": {
+        "content": "📞 INCOMING CALL WEBHOOK / WEBHOOK - ENTRADA DE LLAMADA\n\nReceives Twilio's POST on every incoming call, with CallSid, From, To, CallStatus. Must respond with TwiML (XML), not JSON.\nRecibe el POST que manda Twilio en cada llamada entrante, con CallSid, From, To, CallStatus. Debe responder con TwiML (XML), no JSON.",
+        "height": 384,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        -640
+      ],
+      "id": "ddb7efc1-f9c3-4a1f-8f86-3114cb13e7ca",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>\n  <Gather input=\"speech\" action=\"https://YOUR-TUNNEL-URL.trycloudflare.com/webhook/voice-agent-respuesta\" method=\"POST\" speechTimeout=\"auto\" language=\"es-MX\">\n    <Say voice=\"Polly.Mia\" language=\"es-MX\">Hola, gracias por llamar. Soy el asistente virtual. ¿En qué te puedo ayudar hoy?</Say>\n  </Gather>\n</Response>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/xml"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -80,
+        -400
+      ],
+      "id": "060d578e-6303-4b34-88bb-9a55119ce662",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "🗣️ INITIAL GREETING / SALUDO INICIAL\n\nReturns TwiML: greets the caller and activates <Gather> to listen in Spanish. When the user finishes speaking, Twilio transcribes and posts to the \"voice-agent-respuesta\" webhook. Content-Type: text/xml is mandatory.\nDevuelve TwiML: saluda al que llama y activa <Gather> para escuchar en español. Cuando el usuario termina de hablar, Twilio transcribe y dispara un POST al webhook \"voice-agent-respuesta\". Content-Type: text/xml es obligatorio.",
+        "height": 400,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -656
+      ],
+      "id": "d603eaa0-0e0d-417d-bc5f-93faffb4dba1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "voice-agent-respuesta",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -704,
+        96
+      ],
+      "id": "be483a08-82d8-42d8-800f-e07e2516415a",
+      "name": "Webhook1",
+      "webhookId": "0520d3ea-422d-48ac-accf-02bafeeddf85"
+    },
+    {
+      "parameters": {
+        "content": "👂 TRANSCRIPTION WEBHOOK / WEBHOOK - RECIBE TRANSCRIPCIÓN\n\nTwilio calls this when the user finishes speaking (defined in <Gather action=\"...\">). Transcribed text arrives in $json.body.SpeechResult, along with CallSid to track the call.\nTwilio llama acá cuando el usuario termina de hablar (definido en <Gather action=\"...\">). El texto transcripto viene en $json.body.SpeechResult, junto con CallSid para trackear la llamada.",
+        "height": 400,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        -144
+      ],
+      "id": "3a79dad1-c026-4a32-8695-41f27fd95482",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-haiku-4-5-20251001\",\n  \"max_tokens\": 150,\n  \"system\": \"Eres un asistente telefónico de atención al cliente. Responde SIEMPRE en JSON puro, sin markdown ni backticks, con este formato exacto: {\\\"texto\\\": \\\"tu respuesta hablada, corta y natural para voz\\\", \\\"accion\\\": \\\"continuar\\\"}. El campo accion debe ser: \\\"continuar\\\" si la conversación sigue normal, \\\"despedir\\\" si el usuario se está despidiendo o dando por terminada la llamada (ej. \\\"gracias, eso es todo\\\", \\\"chao\\\", \\\"ya no necesito nada más\\\"), o \\\"transferir\\\" si el usuario pide explícitamente hablar con una persona/humano/agente.\",\n  \"messages\": {{ JSON.stringify($json.messages) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -784,
+        704
+      ],
+      "id": "75631bf3-7bd1-455e-9997-78a615bd50de",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_CLAUDE_API_CREDENTIAL_ID",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 CLAUDE HAIKU CALL / LLAMADA A CLAUDE HAIKU\n\nSends conversation history + new message to Claude Haiku 4.5 — chosen for low latency, key for real-time calls. Low max_tokens (150) forces short, voice-natural replies. Responds in JSON {texto, accion}.\nManda historial + mensaje nuevo a Claude Haiku 4.5 — elegido por baja latencia, clave en llamadas en tiempo real. max_tokens bajo (150) fuerza respuestas cortas, naturales para voz. Responde en JSON {texto, accion}.",
+        "height": 384,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        464
+      ],
+      "id": "56698c56-fc0e-468a-bce6-9b13054bacd2",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "afc1b412-2b3a-462a-a6d2-26f8a719c07e",
+              "name": "respuesta_texto",
+              "value": "={{ $json.texto }}",
+              "type": "string"
+            },
+            {
+              "id": "d4b866e3-3de7-4a5a-b29a-b233fd9c475c",
+              "name": "twiml_respuesta",
+              "value": "={{ $json.accion === 'despedir' ? `<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say voice=\"Polly.Mia\" language=\"es-MX\">${$json.texto}</Say><Hangup/></Response>` : $json.accion === 'transferir' ? `<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Say voice=\"Polly.Mia\" language=\"es-MX\">${$json.texto}</Say><Dial>+1XXXXXXXXXX</Dial></Response>` : `<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Gather input=\"speech\" action=\"https://YOUR-TUNNEL-URL.trycloudflare.com/webhook/voice-agent-respuesta\" method=\"POST\" speechTimeout=\"auto\" language=\"es-MX\"><Say voice=\"Polly.Mia\" language=\"es-MX\">${$json.texto}</Say></Gather></Response>` }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        752,
+        704
+      ],
+      "id": "9eaeb5bb-63f2-4af9-abf4-0440c746fa34",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "🔀 TWIML BY ACTION / TWIML SEGÚN ACCIÓN\n\nBuilds different TwiML based on Claude's decision: continuar → Gather (normal loop), despedir → Say + Hangup, transferir → Say + Dial. ⚠️ Dial number is a PLACEHOLDER — replace with the real human agent number before production.\nArma TwiML distinto según lo que decidió Claude: continuar → Gather (loop normal), despedir → Say + Hangup, transferir → Say + Dial. ⚠️ Número de Dial es PLACEHOLDER — reemplazar por el número real del agente humano antes de producción.",
+        "height": 416,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        432
+      ],
+      "id": "e64bd26a-a193-4be9-a80f-e6ddd6cda902",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $('Edit Fields').item.json.twiml_respuesta }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/xml"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2496,
+        704
+      ],
+      "id": "ee02300e-27da-406e-9c82-1432d5f7b343",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "content": "🔁 CLOSE THE LOOP / CIERRA EL LOOP\n\nReturns the TwiML built with Claude's response. Twilio speaks it and listens again (same Gather), keeping the call active. Repeats until the user hangs up or asks for a human.\nDevuelve el TwiML armado con la respuesta de Claude. Twilio lo lee en voz y vuelve a escuchar (mismo Gather), manteniendo la conversación activa. Se repite hasta que el usuario cuelga o pide un humano.",
+        "height": 352,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        496
+      ],
+      "id": "730fea76-de26-47e8-8aed-7d9166d56470",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "CallSid",
+              "lookupValue": "={{ $json.body.CallSid }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        64,
+        96
+      ],
+      "id": "87fa7c71-a3f0-4f1c-8911-dfa582a9ea48",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📖 READ CALL HISTORY / LEER HISTORIAL\n\nLooks up all previous turns of this call (filtered by CallSid). If it's the first turn, it comes back empty — that's normal and expected.\nBusca todos los turnos previos de esta llamada (filtro por CallSid). Si es el primer turno, vuelve vacío — eso es normal y esperado.",
+        "height": 352,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -96
+      ],
+      "id": "2cec1511-4203-4185-9d20-c9335065790c",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const historial = $input.all().filter(item => item.json.CallSid);\nconst mensajeNuevo = $('Webhook1').first().json.body.SpeechResult;\n\nconst messages = historial.map(item => ({\n  role: item.json.Rol,\n  content: item.json.Mensaje\n}));\n\nmessages.push({\n  role: \"user\",\n  content: mensajeNuevo\n});\n\nreturn [{ json: { messages } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        96
+      ],
+      "id": "22fe29a8-130f-47c6-ac23-d7e01386e574",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "🧩 BUILD MESSAGES WITH HISTORY / ARMAR MENSAJES CON HISTORIAL\n\nConverts the Sheet rows (previous history) into the \"messages\" array Claude needs, and appends the new user message (SpeechResult). On the first turn, history is empty and the array holds a single message.\nConvierte las filas del Sheet (historial previo) en el array \"messages\" que Claude necesita, y le suma el nuevo mensaje del usuario (SpeechResult). Si es el primer turno, historial viene vacío y el array queda con un solo mensaje.",
+        "height": 432,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -176
+      ],
+      "id": "5e7ffdb3-94ac-45f0-9982-d882b00fcffd",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "jsCode": "const callSid = $('Webhook1').first().json.body.CallSid;\nconst mensajeUsuario = $('Webhook1').first().json.body.SpeechResult;\nconst respuestaClaude = $('Edit Fields').first().json.respuesta_texto;\nconst fecha = new Date().toISOString();\n\nreturn [\n  { json: { CallSid: callSid, Rol: \"user\", Mensaje: mensajeUsuario, Fecha: fecha } },\n  { json: { CallSid: callSid, Rol: \"assistant\", Mensaje: respuestaClaude, Fecha: fecha } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        704
+      ],
+      "id": "102b445d-013d-4c58-aed6-190b65fe3d7b",
+      "name": "Preparar Historial"
+    },
+    {
+      "parameters": {
+        "content": "🧩 PREPARE HISTORY ROWS / PREPARAR FILAS DE HISTORIAL\n\nGenerates 2 items: user turn + Claude's response, ready to save to the Sheet. Uses CallSid from the original Webhook1 (not from Edit Fields, that data no longer exists there).\nGenera 2 items: turno del usuario + respuesta de Claude, listos para guardar en el Sheet. Usa CallSid del Webhook1 original (no del Edit Fields, ahí ya no existe ese dato).",
+        "height": 384,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        448
+      ],
+      "id": "ae0fa375-c95d-4b1c-91c6-4535a8cdb827",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "CallSid": "={{ $json.CallSid }}",
+            "Rol": "={{ $json.Rol }}",
+            "Mensaje": "={{ $json.Mensaje }}",
+            "Fecha": "={{ $json.Fecha }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "CallSid",
+              "displayName": "CallSid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Turno",
+              "displayName": "Turno",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Rol",
+              "displayName": "Rol",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mensaje",
+              "displayName": "Mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1920,
+        704
+      ],
+      "id": "1fa37ff8-38df-44da-84e5-88f6840edcfc",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 SAVE TURN TO SHEET / GUARDAR TURNO EN SHEET\n\nAppends both rows (user/assistant) to history. Next loop iteration, the read node will find these turns and feed them to Claude as context.\nAgrega ambas filas (user/assistant) al historial. La próxima vuelta del loop, el nodo de lectura va a encontrar estos turnos y dárselos a Claude como contexto.",
+        "height": 368,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        480
+      ],
+      "id": "7774e542-f35a-4a72-b1cd-2929d81ef2da",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $json.content[0].text;\nconst limpio = rawText.replace(/```json/g, '').replace(/```/g, '').trim();\nconst parsed = JSON.parse(limpio);\n\nreturn [{\n  json: {\n    texto: parsed.texto,\n    accion: parsed.accion\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        704
+      ],
+      "id": "965eff77-bf7e-4a41-86f5-b8cc8a90e04f",
+      "name": "Parsear Respuesta Claude"
+    },
+    {
+      "parameters": {
+        "content": "🧹 PARSE CLAUDE RESPONSE / PARSEAR RESPUESTA DE CLAUDE\n\nStrips markdown backticks if present, parses the JSON {texto, accion}. accion determines whether the next TwiML loops normally, hangs up, or transfers to a human.\nLimpia backticks de markdown si vienen, parsea el JSON {texto, accion}. accion determina si el próximo TwiML hace loop normal, hangup, o transfiere a un humano.",
+        "height": 384,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        464
+      ],
+      "id": "c86cbf24-b515-4142-8450-e98406f5281e",
+      "name": "Sticky Note10"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Parsear Respuesta Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Preparar Historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Historial": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Respuesta Claude": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4b67a4f7-666f-4021-a4a8-6b0635a5e910",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "m6RpdLnLxXM3nIKj",
+  "tags": []
+}
