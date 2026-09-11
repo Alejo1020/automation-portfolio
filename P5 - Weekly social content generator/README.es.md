@@ -43,7 +43,7 @@ Update row in sheet   ──> escribe ambos posts + estado, buscando por fecha
 
 ## Stack técnico
 
-n8n (self-hosted) · Google AI Studio — Gemini API (free tier, fase de pruebas) · Google Sheets
+n8n  · Google AI Studio —  · Google Sheets
 
 ## Aprendizajes técnicos clave
 
