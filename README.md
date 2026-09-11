@@ -40,7 +40,6 @@ Foundational and mid-tier projects — n8n fundamentals through multi-agent syst
 | P10 | Real-time campaign analysis agent | ✅ Complete |
 | P11 | Lead nurturing + client onboarding | ✅ Complete |
 | P12 | AI-powered smart metrics dashboard | ✅ Complete |
-| P13–P16 | Advanced automation modules | ✅ Complete |
 | P17 | Multi-agent system with memory & handoff | ✅ Complete |
 | P18 | Real CRM integration (HubSpot) | ✅ Complete |
 | P19 | Automated billing/ROI system | ✅ Complete |
