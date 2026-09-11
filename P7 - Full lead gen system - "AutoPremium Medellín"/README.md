@@ -38,17 +38,6 @@ Automatically re-engages cold/warm leads that were never followed up, and sends 
 - Owner gets daily visibility (volume, quality breakdown, channel split) with zero manual reporting effort.
 - Fully demonstrable end-to-end: capture → AI qualification → nurture → reporting.
 
-## How This Sells
-
-**Target client**: businesses with high lead volume and a small sales team, in verticals with high ticket value where losing a hot lead to slow response is expensive — car dealerships, real estate, legal services, clinics. Best fit: already using WhatsApp Business and some kind of web form.
-
-**Pricing**:
-- Setup: $300–500 USD — channel integration, qualification prompt tuned to the client's business, connection to their Sheets/CRM.
-- Recurring: $80–150 USD/month — maintenance, prompt tuning, uptime monitoring, support.
-- API cost note: production version uses Claude API (not the Gemini free tier used during development), priced separately or passed through.
-
-**Gap to sell today**: needs a stable domain + Named Tunnel (not a rotating Quick Tunnel URL) before demoing to a real client.
-
 ## Tech Stack
 
 n8n · Gemini 3.6 Flash API (dev/testing) · Claude API (production target) · Twilio WhatsApp · Google Sheets · Gmail · Cloudflare Tunnel
