@@ -39,17 +39,10 @@ System tested end-to-end with 10 test leads across all 3 categories and various 
 
 Zero manual intervention in the evaluate → generate → send → update cycle.
 
-## How This Sells
-
-*"How many leads are going cold because nobody gets to them in time? This system automatically follows up with every lead based on how interested they are — immediate message if hot, progressive education if warm, steady presence without being annoying if cold. All AI-generated, personalized by name and context, with nobody having to remember to write. Plugs directly into your WhatsApp Business."*
-
-**Reference pricing:** $300-500 USD setup + $50-80 USD/month maintenance (or bundled into a broader automation package, e.g. alongside P4 lead qualifier).
-
-**Target client:** dealerships, aesthetic/dental clinics, real estate agencies, law firms — any business with lead volume and a small sales team that can't keep up with manual follow-up.
 
 ## Tech Stack
 
-n8n (self-hosted) · Claude Sonnet 5 (Anthropic API) · Twilio (WhatsApp sandbox) · Google Sheets
+n8n · Claude Sonnet 5 (Anthropic API) · Twilio (WhatsApp sandbox) · Google Sheets
 
 ## Key Technical Learnings
 
