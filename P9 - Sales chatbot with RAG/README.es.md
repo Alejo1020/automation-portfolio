@@ -42,17 +42,9 @@ La base de conocimiento vive en una sola pestaña de Google Sheets. No se usa ba
 - Cero alucinaciones de precios o tratamientos — el modelo está limitado a la base de conocimiento y explícitamente instruido para derivar a un humano cuando no sabe
 - Base de conocimiento editable por el dueño directo en Sheets, sin necesitar un desarrollador para actualizarla
 
-## Cómo se vende
-
-**Pitch:** "Tu WhatsApp responde consultas de precios, horarios y tratamientos al instante, 24/7, sin que tu equipo tenga que estar pegado al celular. Vos controlás las respuestas desde una hoja de cálculo simple. Cuando el bot no sabe algo, deriva a un humano — nunca inventa."
-
-**Cliente objetivo:** Negocios de servicios con alto volumen de consultas simples y repetitivas, y equipo chico de ventas/atención — clínicas estéticas, spas, gimnasios, inmobiliarias, consultorios dentales.
-
-**Rango de precio:** $150-$400 USD de instalación única (base de conocimiento + workflow), o $50-$100 USD/mes por mantenimiento y actualización de la base de conocimiento.
-
 ## Stack técnico
 
-n8n (self-hosted, Docker) · API de WhatsApp de Twilio · Google Sheets · API de Gemini (Google AI Studio) · Cloudflare Tunnel
+n8n · API de WhatsApp de Twilio · Google Sheets · API de Gemini (Google AI Studio) · Cloudflare Tunnel
 
 ## Aprendizajes técnicos clave
 
