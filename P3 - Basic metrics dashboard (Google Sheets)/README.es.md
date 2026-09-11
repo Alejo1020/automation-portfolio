@@ -34,13 +34,6 @@ Dos pestañas en Google Sheets:
 
 Elimina por completo el proceso manual de consolidar métricas diarias. El dueño abre una sola hoja y ve leads totales, ventas cerradas, ingreso acumulado y % de conversión — siempre actualizado, sin tiempo administrativo invertido en armarlo.
 
-## Cómo se vende
-
-- **Cliente objetivo:** negocios de servicios pequeños sin CRM ni hábito de reporting (agencias, concesionarios, clínicas, consultoras)
-- **Pitch:** "Automated Sales Dashboard Setup" — automatización liviana y rápida de desplegar que reemplaza el mantenimiento manual de hojas de cálculo
-- **Rango de precio:** $150-300 USD, entrega en 2-3 días
-- **Upsell natural:** conecta directo con calificación de leads con IA y análisis de campañas — mismo cliente, mayor alcance
-
 ## Tech Stack
 
 n8n (self-hosted, Docker) · Google Sheets API · JavaScript (nodos Code)
