@@ -27,7 +27,6 @@ Schedule Trigger → Get rows (pending topics) → Prepare Topic (Code)
 
 "Load your topics once a month — the system delivers 3 ready-to-review content pieces per topic, every week, without anyone on your team writing from scratch."
 
-Price range: $150-300 USD/month as a maintenance retainer (calendar upkeep, tone adjustments, channel expansion), or $400-600 USD as a one-time build fee for the client's own instance.
 
 ## Tech Stack
 n8n · Google Gemini API (Flash) · Google Sheets · JavaScript (Code nodes)
