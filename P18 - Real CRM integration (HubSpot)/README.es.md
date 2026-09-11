@@ -45,13 +45,7 @@ Un lead entra por webhook (WhatsApp, un formulario, cualquier origen externo), C
 
 100% de los leads entrantes quedan en el CRM sin captura manual. Los leads calientes (score 8-9+ en las pruebas) generan una oportunidad de venta en el pipeline en segundos, en vez de horas o días de triage manual y captura de datos.
 
-## Cómo se vende esto
-
 *"Conecto tu sistema de captación de leads —WhatsApp, un formulario, lo que uses— directo a tu CRM, sin que nadie tenga que copiar y pegar nada. La IA califica el lead al instante y, si es una oportunidad real, aparece en tu pipeline de ventas listo para trabajar."*
-
-**Cliente objetivo:** negocios pequeños/medianos que ya usan HubSpot (u otro CRM) y hoy dependen de captura manual de leads que llegan por WhatsApp, formularios o anuncios.
-
-**Rango de precio:** $300-$600 USD por la integración inicial (un CRM, lógica de calificación, creación de deals), $50-150/mes por mantenimiento o para extenderlo a más fuentes de leads.
 
 ## Tech Stack
 
