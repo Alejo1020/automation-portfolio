@@ -40,12 +40,6 @@ Update row in sheet   ──> escribe ambos posts + estado, buscando por fecha
 - Tiempo estimado ahorrado: ~5–8 horas/mes que un negocio pequeño gastaría redactando posts.
 - Cero intervención humana una vez cargado el calendario de temas.
 
-## Cómo se vende
-
-- **Setup fee**: armar el sistema + calendario de 30 días personalizado al negocio del cliente.
-- **Recurrente**: mantenimiento mensual (recarga de temas, ajustes de tono/marca) o upsell a un retainer completo de "gestión de contenido con IA".
-- **Mejor pitcheado en combo** con sistemas de captación y calificación de leads (P1, P2, P4), como paquete completo de "captación + calificación + contenido", no como herramienta suelta.
-- Clientes objetivo: negocios de servicios locales con flujo de leads recurrente (inmobiliarias, concesionarios, despachos legales) que necesitan responder rápido y mantener redes activas.
 
 ## Stack técnico
 
