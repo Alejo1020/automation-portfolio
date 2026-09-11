@@ -1,0 +1,251 @@
+{
+  "name": "P9 — Sales chatbot with RAG",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "📩 RECEIVE WHATSAPP MESSAGE / RECIBIR MENSAJE DE WHATSAPP\n\nReceives incoming WhatsApp message from Twilio (sandbox), x-www-form-urlencoded, no auth (Twilio doesn't send credentials on inbound requests).\nRecibe mensaje entrante de WhatsApp vía Twilio (sandbox), x-www-form-urlencoded, sin auth (Twilio no manda credenciales en el request entrante).",
+        "height": 352,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-1152, -320],
+      "id": "46c5bbf0-3aa6-4984-a76a-f550fb5a1891",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Catalogo",
+          "mode": "list",
+          "cachedResultName": "Catalogo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-160, -112],
+      "id": "e1fbf388-c439-4cb3-841f-2486b4445fb1",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📚 LOAD KNOWLEDGE BASE / CARGAR BASE DE CONOCIMIENTO\n\nReads the full clinic knowledge base (treatments, prices, hours, location, FAQ) from Sheets, no filter since the dataset is small.\nLee toda la base de conocimiento de la clínica (tratamientos, precios, horarios, ubicación, FAQ) desde Sheets, sin filtro porque el dataset es chico.",
+        "height": 352,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-384, -320],
+      "id": "f688a43b-f7aa-4b3b-b2e3-e5835649a769",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "base_conocimiento",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [576, -112],
+      "id": "23ed63b5-a0e5-4da7-9b19-53460989da70",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "content": "📦 BUNDLE CONTEXT / EMPAQUETAR CONTEXTO\n\nMerges all knowledge base rows into a single array to pass as one context block to Gemini.\nJunta todas las filas de la base de conocimiento en un solo array para pasarlas como un único bloque de contexto a Gemini.",
+        "height": 336,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [384, -320],
+      "id": "6f8314a7-ba0f-4794-b922-66453bb723b8",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text: \"Eres el asistente virtual de una clínica estética en Medellín. Responde el mensaje del cliente usando SOLO la información de esta base de conocimiento, en tono cálido y profesional, breve (máx 80 palabras), en español. Si la pregunta no se puede responder con esta info, dices que un asesor humano se comunicará. Base de conocimiento: \" + JSON.stringify($json.base_conocimiento) + \". Mensaje del cliente: \" + $('Webhook').item.json.body.Body\n    }]\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [-1104, 336],
+      "id": "b4f2926c-32fd-48d0-8a08-b9b347c273dd",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_GEMINI_API_KEY_CREDENTIAL_ID",
+          "name": "Gemini API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🧠 GENERATE RAG ANSWER / GENERAR RESPUESTA RAG\n\nGemini answers using ONLY the knowledge base as context; if it can't answer from the data, it defers to a human advisor instead of guessing.\nGemini responde usando SOLO la base de conocimiento como contexto; si no puede responder con esos datos, deriva a un asesor humano en vez de inventar.",
+        "height": 368,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-1152, 128],
+      "id": "c50b86d3-b932-4a5a-b179-fdb70f2eb393",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "42414201-e973-4143-93d3-c9bb7f2991f1",
+              "name": "respuesta_texto",
+              "value": "={{ $json.candidates[0].content.parts[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "0d41ed56-3bf8-47fa-a1a3-58e8fd394ccb",
+              "name": "telefono_destino",
+              "value": "={{ $('Webhook').item.json.body.From.replace(' ', '+') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [-192, 336],
+      "id": "6e7327c2-45f1-43d2-b89c-63827cde3592",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "✂️ EXTRACT REPLY DATA / EXTRAER DATOS DE RESPUESTA\n\nPulls the clean answer text and the sender's WhatsApp number, restoring the '+' lost in URL-decoding.\nExtrae el texto limpio de la respuesta y el número de WhatsApp del remitente, restaurando el '+' perdido en la decodificación de URL.",
+        "height": 368,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-384, 128],
+      "id": "1c747133-5add-452f-81fa-1c46e3b47f6f",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "To",
+              "value": "={{ $json.telefono_destino }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.respuesta_texto }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [560, 336],
+      "id": "18f2d61e-abc3-4c07-a7aa-73f994dc6775",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_TWILIO_CREDENTIAL_ID",
+          "name": "Twilio Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📤 SEND WHATSAPP REPLY / ENVIAR RESPUESTA POR WHATSAPP\n\nSends Gemini's generated answer back to the customer via Twilio WhatsApp, closing the RAG chatbot loop.\nEnvía la respuesta generada por Gemini de vuelta al cliente vía Twilio WhatsApp, cerrando el ciclo del chatbot RAG.",
+        "height": 336,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [336, 144],
+      "id": "3701a4b4-0098-4885-83ab-a33f152089b2",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "clinica-chat",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-944, -112],
+      "id": "8825d158-6c5b-44a0-8f70-b58d72a56b80",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get row(s) in sheet": {
+      "main": [[{ "node": "Aggregate", "type": "main", "index": 0 }]]
+    },
+    "Aggregate": {
+      "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]]
+    },
+    "HTTP Request": {
+      "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]]
+    },
+    "Edit Fields": {
+      "main": [[{ "node": "HTTP Request1", "type": "main", "index": 0 }]]
+    },
+    "Webhook": {
+      "main": [[{ "node": "Get row(s) in sheet", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "20d07726-8d4a-4bba-af27-ea527011b657",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "3FLulrc9zL0M8Dj8",
+  "tags": []
+}
