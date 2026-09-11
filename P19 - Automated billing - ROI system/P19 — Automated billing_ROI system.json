@@ -1,0 +1,482 @@
+{
+  "name": "P19 — Automated billing/ROI system",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        32
+      ],
+      "id": "fc8a1947-d13f-4d21-b81b-cf328e392c27",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "⏰ SCHEDULE TRIGGER / SCHEDULE TRIGGER\n\nRuns every Monday at 8am, generating last week's ROI report.\nDispara el flujo cada lunes a las 8am. Genera el reporte de ROI de la semana anterior.\nIn production: switch to monthly if deal volume is low.\nEn producción: cambiar a mensual si el volumen de deals es bajo.",
+        "height": 368,
+        "width": 512,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -192
+      ],
+      "id": "0a852189-24c3-4e70-85c8-11b71d7967cd",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1842704117,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1842704117"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        32
+      ],
+      "id": "7d78a7af-5595-4075-9661-ee220e6cda8b",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📊 READ CLOSED DEALS / LEER DEALS CERRADOS\n\nPulls all rows from the billing Sheet.\nTrae todas las filas del Sheet de facturación.\nPeriod filtering happens in the next node (Code), not here — more flexible to adjust later.\nEl filtro por semana se hace en el siguiente nodo (Code), no acá — más flexible para ajustar el rango después.",
+        "height": 368,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -192
+      ],
+      "id": "d7852ec9-0e53-4d02-a034-e2f25afb5764",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "💰 CALCULATE ROI / CALCULAR ROI\n\nSums revenue from all deals loaded in the Sheet.\nSuma el ingreso de todos los deals cargados en el Sheet.\nSubtracts fixed operating cost (APIs + infrastructure). Returns ROI% + summary ready for Claude to turn into business language.\nResta el costo operativo fijo (APIs + infraestructura). Devuelve ROI% + resumen listo para que Claude lo convierta en lenguaje de negocio.",
+        "height": 384,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        -208
+      ],
+      "id": "36bf5c94-ba51-4c5c-9cfe-08287f5246e7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"claude-sonnet-5\",\n  max_tokens: 500,\n  messages: [{\n    role: \"user\",\n    content: \"Eres un asesor financiero para pequeños negocios de servicios. Con estos datos de ingresos y costos operativos de un sistema de automatización, escribe un resumen ejecutivo breve (máximo 120 palabras) para el dueño del negocio, en español latino neutro, sin tecnicismos. Incluye: ingreso total, ROI, y una recomendación breve. Datos: \" + JSON.stringify($json)\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1872,
+        32
+      ],
+      "id": "5cf68c2b-af92-4b77-8b4a-e591a4ccc724",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_CLAUDE_API_CREDENTIAL_ID",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 EXECUTIVE SUMMARY WITH CLAUDE / RESUMEN EJECUTIVO CON CLAUDE\n\nTurns raw numbers into a business-language paragraph, free of technical jargon.\nConvierte los números crudos en un párrafo de negocio, listo para leer sin jerga técnica.\nClaude Sonnet 5 — final portfolio version.\nClaude Sonnet 5 — versión final de portafolio.",
+        "height": 384,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -208
+      ],
+      "id": "e0fa4a23-9590-4b12-9c0d-88136ccd97f8",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce111ca0-aa00-4f5a-a917-20de6d754809",
+              "name": "resumen_ejecutivo",
+              "value": "={{ $json.content[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "f8c7094e-9b62-470d-976f-c64e0b55eb1e",
+              "name": "fecha_reporte",
+              "value": "={{ $('Code').item.json.fecha_reporte }}",
+              "type": "string"
+            },
+            {
+              "id": "f92eee46-b3d0-472b-801e-3ffaaf0dba7c",
+              "name": "ingreso_total",
+              "value": "={{ $('Code').item.json.ingreso_total }}",
+              "type": "string"
+            },
+            {
+              "id": "37853cee-2581-4a56-bbf5-2dabeed1438c",
+              "name": "costo_operativo",
+              "value": "={{ $('Code').item.json.costo_operativo }}",
+              "type": "string"
+            },
+            {
+              "id": "09ff21eb-81f4-4084-9f59-e2a064e025ab",
+              "name": "roi_porcentaje",
+              "value": "={{ $('Code').item.json.roi_porcentaje }}",
+              "type": "string"
+            },
+            {
+              "id": "57ce888b-61e5-45ad-9a68-e2b6c79a0b8a",
+              "name": "cantidad_deals",
+              "value": "={{ $('Code').item.json.cantidad_deals }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        64,
+        544
+      ],
+      "id": "035c1537-83a9-48bc-aade-30ff3bc91362",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Costo operativo fijo mensual estimado (APIs + infraestructura)\nconst COSTO_FIJO_MENSUAL = 50; // ajustá este número a tu costo real\n\nconst items = $input.all();\nconst filas = items.map(i => i.json);\n\nconst ingresoTotal = filas.reduce((sum, f) => sum + Number(f.monto_usd || 0), 0);\nconst cantidadDeals = filas.length;\nconst roi = ingresoTotal > 0\n  ? (((ingresoTotal - COSTO_FIJO_MENSUAL) / COSTO_FIJO_MENSUAL) * 100).toFixed(1)\n  : 0;\n\nreturn [{\n  json: {\n    fecha_reporte: new Date().toISOString().split('T')[0],\n    ingreso_total: ingresoTotal,\n    costo_operativo: COSTO_FIJO_MENSUAL,\n    cantidad_deals: cantidadDeals,\n    roi_porcentaje: roi,\n    detalle_deals: filas\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        32
+      ],
+      "id": "98e0a031-d396-4368-9a0c-4726d5b4e181",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "📋 EXTRACT SUMMARY + REBUILD DATA / EXTRAER RESUMEN + RECONSTRUIR DATOS\n\n$json resets after the HTTP Request to Claude.\n$json se resetea después del HTTP Request a Claude.\nWe explicitly reference the Code node with $('Code') to recover revenue/cost/ROI + the summary text.\nReferenciamos el nodo Code explícitamente con $('Code') para recuperar ingreso/costo/ROI + el texto del resumen.",
+        "height": 384,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        304
+      ],
+      "id": "4cd55b09-b8b5-48ff-baae-6b38d8e48145",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "P19_ROI_Facturacion",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 952465906,
+          "mode": "list",
+          "cachedResultName": "Historico_ROI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=952465906"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_reporte": "={{ $json.fecha_reporte }}",
+            "ingreso_total": "={{ $json.ingreso_total }}",
+            "costo_operativo": "={{ $json.costo_operativo }}",
+            "roi_porcentaje": "={{ $json.roi_porcentaje }}",
+            "cantidad_deals": "={{ $json.cantidad_deals }}",
+            "resumen_ejecutivo": "={{ $json.resumen_ejecutivo }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_reporte",
+              "displayName": "fecha_reporte",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ingreso_total",
+              "displayName": "ingreso_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "costo_operativo",
+              "displayName": "costo_operativo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "roi_porcentaje",
+              "displayName": "roi_porcentaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad_deals",
+              "displayName": "cantidad_deals",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resumen_ejecutivo",
+              "displayName": "resumen_ejecutivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        544
+      ],
+      "id": "4bb23c4d-0e3c-40a0-86e0-3807c7ca5767",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 SAVE ROI HISTORY / GUARDAR HISTÓRICO DE ROI\n\nEach run adds a new row to Historico_ROI.\nCada ejecución agrega una fila nueva a Historico_ROI.\nOver time this becomes the track record you show the client as evidence of results.\nCon el tiempo esto se vuelve el trackrecord que le muestras al cliente como evidencia de resultados.",
+        "height": 384,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        320
+      ],
+      "id": "3056b30f-36be-4a8a-bdf0-c38e44c2e5e0",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "subject": "=Reporte de ROI - {{ $json.fecha_reporte }}",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;\">\n  <h2 style=\"color:#0f3460;border-bottom:2px solid #0f3460;padding-bottom:10px;\">\n    📊 Reporte de ROI — {{ $json.fecha_reporte }}\n  </h2>\n  <div style=\"line-height:1.6;color:#333;\">\n    {{ $json.resumen_ejecutivo.replace(/### (.*)/g, '<h3>$1</h3>').replace(/# (.*)/g, '<h2>$1</h2>').replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>').replace(/\\n\\n/g, '<br><br>').replace(/\\n/g, '<br>') }}\n  </div>\n  <hr style=\"border:none;border-top:1px solid #ddd;margin:20px 0;\">\n  <p style=\"color:#999;font-size:12px;\">Generado automáticamente · Sistema de ROI</p>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        544
+      ],
+      "id": "9f58d726-4b12-4a4c-8ca8-e5437d03d9bc",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📧 SEND REPORT / ENVIAR REPORTE\n\nSends the executive summary as formatted HTML.\nManda el resumen ejecutivo en HTML formateado.\nCloses the loop: deal closed → ROI calculated → report in the owner's inbox, zero manual work.\nCierra el ciclo: deal cerrado → ROI calculado → reporte en la bandeja del dueño, cero intervención manual.",
+        "height": 384,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        320
+      ],
+      "id": "70c46197-9c13-43cc-b296-e3e6a7b09980",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "bfcf767f-1e93-4421-98d0-e501972884f6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "M2ZtKJmwtRYmOMeO",
+  "tags": []
+}
