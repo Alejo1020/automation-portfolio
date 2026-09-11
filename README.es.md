@@ -38,7 +38,6 @@ Proyectos base y de nivel medio — desde fundamentos de n8n hasta sistemas mult
 | P10 | Agente de análisis de campañas en tiempo real | ✅ Completo |
 | P11 | Nutrición de leads + onboarding de clientes | ✅ Completo |
 | P12 | Dashboard inteligente con IA | ✅ Completo |
-| P13–P16 | Módulos avanzados de automatización | ✅ Completo |
 | P17 | Sistema multi-agente con memoria y handoff | ✅ Completo |
 | P18 | Integración CRM real (HubSpot) | ✅ Completo |
 | P19 | Sistema de facturación/ROI automático | ✅ Completo |
