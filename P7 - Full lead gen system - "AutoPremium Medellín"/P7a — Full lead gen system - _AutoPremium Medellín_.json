@@ -1,0 +1,702 @@
+{
+  "name": "P7a — Full lead gen system - \"AutoPremium Medellín\"",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "📝 WEBHOOK - FORM\nReceives leads from a simulated web form.\nExpects JSON with: name, phone, message, source.\nChannel 1 of 2 for lead capture.\n\n---\n\n📝 WEBHOOK - FORMULARIO\nRecibe leads desde un formulario web simulado.\nEspera JSON con: nombre, telefono, mensaje, origen.\nCanal 1 de 2 para captación de leads.",
+        "height": 400,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -320
+      ],
+      "id": "29986909-e80c-40a2-9ad9-eacc7eece77f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-form",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -736,
+        -48
+      ],
+      "id": "586d7a92-6ea8-4168-b7ff-3961149b12c8",
+      "name": "Webhook Form",
+      "webhookId": "7662f55e-cb32-4203-8bdd-eacf4cacae21"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-whatsapp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        432
+      ],
+      "id": "72e0a498-1258-4e8c-8b84-7c36051dc319",
+      "name": "Webhook WhatsApp",
+      "webhookId": "44b87698-0756-411b-98bd-52f64fac06c6"
+    },
+    {
+      "parameters": {
+        "content": "📱 WEBHOOK - WHATSAPP\nReceives incoming messages from the Twilio sandbox.\nDifferent format than the form: From, Body (plain text).\nChannel 2 of 2 for lead capture.\n\n---\n\n📱 WEBHOOK - WHATSAPP\nRecibe mensajes entrantes desde el sandbox de Twilio.\nFormato distinto al form: From, Body (texto plano).\nCanal 2 de 2 para captación de leads.",
+        "height": 416,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        160
+      ],
+      "id": "d05ff83e-6823-45f9-a0d5-47d6cae0e19f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "🔧 NORMALIZE - FORM\nStandardizes form fields into a common format:\nname, phone, message, source.\nRequired so both channels arrive the same way\nat the Merge node.\n\n---\n\n🔧 NORMALIZAR - FORMULARIO\nEstandariza los campos del form a un formato\ncomún: nombre, telefono, mensaje, origen.\nNecesario para que ambos canales lleguen\niguales al Merge.",
+        "height": 432,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -336
+      ],
+      "id": "5ffe3de6-3856-48e0-8d3a-870f01d063b1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e6aecc65-a122-40c2-be65-d1be0fe779bd",
+              "name": "nombre",
+              "value": "={{ $json.body.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "3c37f08c-bcde-4753-aaf8-1fc7345cd1f7",
+              "name": "telefono",
+              "value": "={{ $json.body.telefono }}",
+              "type": "string"
+            },
+            {
+              "id": "729c2929-fc12-4637-af1e-9fa482ebcab6",
+              "name": "mensaje",
+              "value": "={{ $json.body.mensaje }}",
+              "type": "string"
+            },
+            {
+              "id": "924491be-6826-44e9-adaf-c995c689cbaf",
+              "name": "origen",
+              "value": "={{ $json.body.origen }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        16,
+        -48
+      ],
+      "id": "4d09fbdb-14a7-48d0-bb8d-d0dbe98d31cc",
+      "name": "Edit Fields (Form)"
+    },
+    {
+      "parameters": {
+        "content": "🔧 NORMALIZE - WHATSAPP\nTwilio doesn't send \"name\" or \"source\" — only\nFrom and Body. Missing fields are filled in and\nthe \"whatsapp:\" prefix is stripped from the number.\n\n---\n\n🔧 NORMALIZAR - WHATSAPP\nTwilio no manda \"nombre\" ni \"origen\" — solo\nFrom y Body. Se rellenan campos faltantes\ny se limpia el prefijo \"whatsapp:\" del número.",
+        "height": 416,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        160
+      ],
+      "id": "0936324f-db0b-4ac9-b8f8-fcd535c5e833",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e6aecc65-a122-40c2-be65-d1be0fe779bd",
+              "name": "nombre",
+              "value": "=Lead WhatsApp",
+              "type": "string"
+            },
+            {
+              "id": "3c37f08c-bcde-4753-aaf8-1fc7345cd1f7",
+              "name": "telefono",
+              "value": "={{ $json.body.From.replace('whatsapp:+57', '') }}",
+              "type": "string"
+            },
+            {
+              "id": "729c2929-fc12-4637-af1e-9fa482ebcab6",
+              "name": "mensaje",
+              "value": "={{ $json.body.Body }}",
+              "type": "string"
+            },
+            {
+              "id": "924491be-6826-44e9-adaf-c995c689cbaf",
+              "name": "origen",
+              "value": "=WhatsApp",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -32,
+        432
+      ],
+      "id": "a7589a0c-4a07-485a-b7e4-616abd737279",
+      "name": "Edit Fields (WhatsApp)"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        80
+      ],
+      "id": "48c0fa61-c9db-476e-89c5-0c6b9ca16042",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "🔀 MERGE - UNIFY CHANNELS\nJoins leads from Form and WhatsApp into a single\nflow, regardless of which arrived. Mode: Append\n(stacks, doesn't combine by index).\nFrom here on the flow is unified regardless\nof the source channel.\n\n---\n\n🔀 MERGE - UNIFICAR CANALES\nJunta los leads de Form y WhatsApp en un solo\nflujo, sin importar cuál llegó. Mode: Append\n(apila, no combina por índice).\nA partir de acá el flujo es único sin importar\nel canal de origen.",
+        "height": 528,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -288
+      ],
+      "id": "e7154717-4a33-4685-b4b4-6f1847998333",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"Eres un calificador de leads para un concesionario de autos. Analiza este mensaje y responde SOLO con JSON: {\\\"score\\\": 1-10, \\\"categoria\\\": \\\"frio/tibio/caliente\\\", \\\"razon\\\": \\\"breve\\\"}. Mensaje del lead: {{ $json.mensaje }}, origen: {{ $json.origen }}\"\n    }]\n  }]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1120,
+        80
+      ],
+      "id": "36abae29-4258-4caf-9c32-0275458c31a1",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5NxLSzT0cgy8vgeZ",
+          "name": "Gemini 1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 QUALIFY WITH GEMINI 3.6 FLASH\nAnalyzes the lead's message and returns score\n1-10, category (cold/warm/hot) and reason.\nFree tier — test data only. Retry enabled\ndue to service throttling.\n\n---\n\n🤖 CALIFICAR CON GEMINI 3.6 FLASH\nAnaliza el mensaje del lead y devuelve score\n1-10, categoría (frío/tibio/caliente) y razón.\nFree tier — solo datos ficticios. Retry activado\npor saturación del servicio.",
+        "height": 480,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        976,
+        -240
+      ],
+      "id": "efbf28ac-be42-4971-9e30-1f5d0f259376",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d8111424-8a9f-495a-9685-d52cc73b7805",
+              "name": "resultado_limpio",
+              "value": "={{ $json.candidates[0].content.parts[0].text.replace('```json', '').replace('```', '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1648,
+        80
+      ],
+      "id": "95eddbe7-281a-4204-899c-2f4d9645f627",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "🧹 CLEAN GEMINI RESPONSE\nGemini wraps the JSON in markdown backticks\n(```json). This node strips them and\nleaves the string ready to be parsed.\n\n---\n\n🧹 LIMPIAR RESPUESTA GEMINI\nGemini devuelve el JSON envuelto en backticks\nde markdown (```json). Este nodo los quita y\ndeja el string listo para parsear.",
+        "height": 432,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        -192
+      ],
+      "id": "82bf668e-8032-4e4d-8314-3dc95f40b771",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const parsed = JSON.parse($json.resultado_limpio);\nreturn {\n  nombre: $('Merge').item.json.nombre,\n  telefono: $('Merge').item.json.telefono,\n  mensaje: $('Merge').item.json.mensaje,\n  origen: $('Merge').item.json.origen,\n  score: parsed.score,\n  categoria: parsed.categoria,\n  razon: parsed.razon,\n  fecha: new Date().toISOString().split('T')[0]\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        768
+      ],
+      "id": "d56abb4e-a77f-4124-a0a1-016d6a5cc190",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PARSE AND BUILD FINAL OBJECT\nConverts the cleaned JSON into usable data.\nCombines the lead's data (from Merge, not\nWebhook — since it can come from either\nchannel) with Gemini's qualification.\n\n---\n\n🔧 PARSEAR Y ARMAR OBJETO FINAL\nConvierte el JSON limpio en datos usables.\nJunta los datos del lead (desde Merge, no\nWebhook — porque puede venir de cualquier\ncanal) + la calificación de Gemini.",
+        "height": 480,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        432
+      ],
+      "id": "39099422-3bb3-403c-b544-8ffba93b585b",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WnM5md7h4jx1Sc79pLp5JUZfRSSpnr2RtzXZ6oEl4IQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WnM5md7h4jx1Sc79pLp5JUZfRSSpnr2RtzXZ6oEl4IQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $json.nombre }}",
+            "telefono": "={{ $json.telefono }}",
+            "mensaje": "={{ $json.mensaje }}",
+            "origen": "={{ $json.origen }}",
+            "score": "={{ $json.score }}",
+            "categoria": "={{ $json.categoria }}",
+            "razon": "={{ $json.razon }}",
+            "fecha": "={{ $json.fecha }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "razon",
+              "displayName": "razon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        768
+      ],
+      "id": "dcc9883e-3932-4650-a558-a87fbdea0ef8",
+      "name": "Google Sheets (Guardar lead)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 SAVE QUALIFIED LEAD\nSaves every lead (from Form or WhatsApp)\nwith its qualification to Sheets: name, phone,\nmessage, source, score, category, reason.\n\n---\n\n💾 GUARDAR LEAD CALIFICADO\nGuarda cada lead (venga de Form o WhatsApp)\ncon su calificación en Sheets: nombre, telefono,\nmensaje, origen, score, categoria, razon.",
+        "height": 464,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        480
+      ],
+      "id": "c5c2c8a1-fe94-48fa-ab77-5334308e7e70",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1175f522-2c8a-4dc7-ab88-e2c5f9932d9d",
+              "leftValue": "={{ $json.categoria }}",
+              "rightValue": "caliente",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1840,
+        768
+      ],
+      "id": "e26c6d82-045f-47e7-9d17-bfd52d9e858e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "🔥 FILTER - HOT LEADS ONLY\nOnly leads categorized \"hot\" continue\nto the next step (WhatsApp alert).\nCold/warm don't spend a Twilio message.\n\n---\n\n🔥 FILTRO - SOLO LEADS CALIENTES\nSolo los leads categoría \"caliente\" siguen\nal siguiente paso (alerta WhatsApp).\nFrío/tibio no gastan mensaje de Twilio.",
+        "height": 416,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        496
+      ],
+      "id": "5d1fbf6f-9d4e-4f73-9e46-bdef9e29198c",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+57{{ $json.telefono }}"
+            },
+            {
+              "name": "Body",
+              "value": "=🔥 Lead caliente AutoPremium: {{ $json.nombre }} - Score {{ $json.score }}. Razón: {{ $json.razon }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2448,
+        752
+      ],
+      "id": "be889f13-0683-4d4b-a9b9-037b9475924b",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "LQyEArLzg0pmjClm",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📲 WHATSAPP ALERT - HOT LEAD\nNotifies via WhatsApp when a lead qualifies\nas \"hot\". Uses Twilio sandbox — the\ndestination number must be joined to the sandbox.\n\n---\n\n📲 ALERTA WHATSAPP - LEAD CALIENTE\nNotifica por WhatsApp cuando el lead califica\ncomo \"caliente\". Usa sandbox de Twilio —\nel número destino debe estar unido al sandbox.",
+        "height": 432,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        480
+      ],
+      "id": "e9ee518f-6a7c-4aca-ada4-9dcf0396f086",
+      "name": "Sticky Note10"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Form": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields (Form)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields (Form)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields (WhatsApp)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets (Guardar lead)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets (Guardar lead)": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e17cc45c-2966-414b-aa00-c373cef087df",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad71c5258db3ecec46cfbe0407ab958981cfdc96a9b91ef604ec3c3ea533e7e0"
+  },
+  "nodeGroups": [],
+  "id": "ix6fRD8Q4xBUJ7Mq",
+  "tags": []
+}

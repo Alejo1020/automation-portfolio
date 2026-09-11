@@ -1,0 +1,773 @@
+{
+  "name": "P7b — Full lead gen system — \"AutoPremium Medellín\"",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -720,
+        -96
+      ],
+      "id": "abb5ba17-cffd-4e5b-bc87-56ed8abb898c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "⏰ SCHEDULE TRIGGER - NURTURE\nFires daily at 9am.\nStarts the follow-up flow for cold/warm\nleads not yet contacted.\n\n---\n\n⏰ SCHEDULE TRIGGER - NUTRICIÓN\nDispara diario a las 9am.\nInicio del flujo de seguimiento a leads\nfríos/tibios no contactados aún.",
+        "height": 400,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -352
+      ],
+      "id": "d759013d-e213-4234-8811-6167db4811c9",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1WnM5md7h4jx1Sc79pLp5JUZfRSSpnr2RtzXZ6oEl4IQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WnM5md7h4jx1Sc79pLp5JUZfRSSpnr2RtzXZ6oEl4IQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -128,
+        -96
+      ],
+      "id": "fd3a3068-2e98-4148-b053-b879d18f0b2c",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📋 READ LEADS\nPulls all rows from the Leads sheet.\nThe actual filter (cold/warm + not contacted)\nis applied in the following Filter node.\n\n---\n\n📋 LEER LEADS\nTrae todas las filas de la hoja Leads.\nEl filtro real (frío/tibio + sin contactar)\nse aplica en el nodo Filter siguiente.",
+        "height": 400,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -352
+      ],
+      "id": "15a49f11-5592-48ed-bb3b-895ff6c7684b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fc89ebdb-6a96-4cf7-9f3d-bcc2c7612ce6",
+              "leftValue": "={{ $json.categoria }}",
+              "rightValue": "caliente",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "50f734ab-2868-4558-8a6f-2a1f8e464a60",
+              "leftValue": "={{ $json.estado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        384,
+        -96
+      ],
+      "id": "4401d250-5207-4dfa-aa87-1b066591371a",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "content": "🔍 FILTER - COLD/WARM, NOT CONTACTED ONLY\nLets through leads that are NOT hot and\ndon't yet have estado=\"contacted\".\nAvoids duplicate messages or spend on hot leads.\n\n---\n\n🔍 FILTRAR - SOLO FRÍOS/TIBIOS SIN CONTACTAR\nDeja pasar leads que NO son caliente y que\naún no tienen estado=\"contactado\".\nEvita duplicar mensajes o gastar en calientes.",
+        "height": 400,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -352
+      ],
+      "id": "9a6b764f-9761-4527-ab9a-e35f798648bf",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text: \"Eres un asesor comercial de un concesionario de autos en Medellín. Escribe un mensaje corto de seguimiento por WhatsApp (máx 3 líneas) para retomar contacto con este lead que no ha respondido. Tono cercano, colombiano, sin sonar robótico, sin emojis excesivos. Nombre: \" + $json.nombre + \". Mensaje original del lead: \" + $json.mensaje + \". Categoría: \" + $json.categoria + \". Razón de la categoría: \" + $json.razon + \". Responde SOLO con el texto del mensaje, sin comillas ni JSON.\"\n    }]\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        928,
+        -96
+      ],
+      "id": "e7fc0f36-4e0c-4a85-aa3b-b4cabb6fb1dc",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5NxLSzT0cgy8vgeZ",
+          "name": "Gemini 1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 GENERATE FOLLOW-UP MESSAGE\nGemini drafts a short, personalized message\nbased on name, original message and category\nreason. Plain text response, not JSON\n(no structure needs parsing).\n\n---\n\n🤖 GENERAR MENSAJE DE SEGUIMIENTO\nGemini redacta un mensaje corto y personalizado\nsegún nombre, mensaje original y razón de\ncategoría frío/tibio. Respuesta en texto plano,\nno JSON (no necesitamos parsear estructura).",
+        "height": 464,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        736,
+        -400
+      ],
+      "id": "e64e3f30-5c2f-47cc-a524-b7dd14b19f59",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "82c6d608-9ea4-4dd6-88ab-6b41591c2af0",
+              "name": "mensaje_seguimiento",
+              "value": "={{ $json.candidates[0].content.parts[0].text.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "3ae76090-5e3e-4f48-8cf2-635ceea9c601",
+              "name": "telefono",
+              "value": "={{ $('Filter').item.json.telefono }}",
+              "type": "string"
+            },
+            {
+              "id": "e01f8012-b5c9-4939-b2a0-14b04f4a8b84",
+              "name": "nombre",
+              "value": "={{ $('Filter').item.json.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "8a6e6f9c-8226-433b-a435-0d0f072107ae",
+              "name": "categoria",
+              "value": "={{ $('Filter').item.json.categoria }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1440,
+        -96
+      ],
+      "id": "ef63f110-a6d1-4137-b59b-db833ca725f6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "🧹 CLEAN GEMINI MESSAGE\nExtracts the plain text from the response and\ntrims extra whitespace/line breaks. Keeps the\nlead's other fields (name, phone, etc.) for\nthe following nodes.\n\n---\n\n🧹 LIMPIAR MENSAJE GEMINI\nExtrae el texto plano de la respuesta y quita\nespacios/saltos sobrantes. Mantiene los demás\ncampos del lead (nombre, telefono, etc.) para\nlos nodos siguientes.",
+        "height": 464,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        -400
+      ],
+      "id": "699ec355-5afb-4a82-932a-34b84dc04ee5",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+57{{ $json.telefono }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.mensaje_seguimiento }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2016,
+        -96
+      ],
+      "id": "ded0b48b-4200-4181-88ca-38b8eae2c77e",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "LQyEArLzg0pmjClm",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📲 SEND WHATSAPP FOLLOW-UP\nSends the message generated by Gemini to the\nlead via the Twilio sandbox.\n\n---\n\n📲 ENVIAR SEGUIMIENTO WHATSAPP\nManda el mensaje generado por Gemini al lead\nvía sandbox de Twilio.",
+        "height": 416,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1856,
+        -352
+      ],
+      "id": "c38663dd-d786-4be2-881d-6e65c301dc74",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "✅ MARK AS CONTACTED\nUpdates estado=\"contacted\" on the lead's row,\nmatching by phone. Prevents duplicate resends\non the next daily run.\n\n---\n\n✅ MARCAR COMO CONTACTADO\nActualiza estado=\"contactado\" en la fila del\nlead, matcheando por telefono. Evita reenvíos\nduplicados en la próxima corrida diaria.",
+        "height": 432,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2432,
+        -352
+      ],
+      "id": "4a40c96c-1713-4055-bee9-b2c81bd2bd47",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1WnM5md7h4jx1Sc79pLp5JUZfRSSpnr2RtzXZ6oEl4IQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WnM5md7h4jx1Sc79pLp5JUZfRSSpnr2RtzXZ6oEl4IQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telefono": "={{ $('Edit Fields').item.json.telefono }}",
+            "estado": "contactado",
+            "row_number": "={{ $('Filter').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "razon",
+              "displayName": "razon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2560,
+        -96
+      ],
+      "id": "f0d60e0b-25be-4a7c-8804-fb9cbcce9dfc",
+      "name": "Google Sheets (Update, marcar \"contactado\")",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -704,
+        528
+      ],
+      "id": "93407ba9-9928-469a-8abe-b057cf79ed0c",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "content": "⏰ SCHEDULE TRIGGER - REPORTING\nFires daily at 8pm (end of day).\nStarts the daily report flow for the\nAutoPremium owner.\n\n---\n\n⏰ SCHEDULE TRIGGER - REPORTING\nDispara diario a las 8pm (cierre de jornada).\nInicio del flujo de reporte diario al dueño\nde AutoPremium.",
+        "height": 400,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        272
+      ],
+      "id": "ee72df8f-9062-40ac-bb35-2012614a4754",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1WnM5md7h4jx1Sc79pLp5JUZfRSSpnr2RtzXZ6oEl4IQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WnM5md7h4jx1Sc79pLp5JUZfRSSpnr2RtzXZ6oEl4IQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        528
+      ],
+      "id": "8b0f1ffe-e791-4218-81cd-f7ff2a3ce73f",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8SzIfZQMXmxYOA9P",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📋 READ LEADS - REPORTING\nPulls all rows from Leads.\nToday's date filter is applied\nin the following Filter node.\n\n---\n\n📋 LEER LEADS - REPORTING\nTrae todas las filas de Leads.\nEl filtro por fecha de hoy se aplica\nen el nodo Filter siguiente.",
+        "height": 400,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        272
+      ],
+      "id": "72d9a645-cef7-445d-8f34-fdaa7a8c312b",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1182dc0e-9e9e-45e7-9223-c30126175731",
+              "leftValue": "={{ $json.fecha }}",
+              "rightValue": "={{ $now.format('yyyy-MM-dd') }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        560,
+        528
+      ],
+      "id": "ab199126-5f7b-4561-ae78-8c34d768a951",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "content": "🔍 FILTER - TODAY'S LEADS ONLY\nLets through only leads whose date\nmatches the system's current day.\nBasis for the daily summary.\n\n---\n\n🔍 FILTRAR - SOLO LEADS DE HOY\nDeja pasar solo los leads cuya fecha\ncoincide con el día actual del sistema.\nBase para el resumen diario.",
+        "height": 400,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        272
+      ],
+      "id": "c62ff7a5-ef25-4717-a4fe-d90635168ec7",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst leads = items.map(i => i.json);\n\nconst total = leads.length;\nconst calientes = leads.filter(l => l.categoria === 'caliente').length;\nconst tibios = leads.filter(l => l.categoria === 'tibio').length;\nconst frios = leads.filter(l => l.categoria === 'frio').length;\nconst porForm = leads.filter(l => l.origen === 'form').length;\nconst porWhatsapp = leads.filter(l => l.origen === 'WhatsApp').length;\n\nreturn [{\n  json: {\n    fecha: new Date().toISOString().split('T')[0],\n    total_leads: total,\n    calientes,\n    tibios,\n    frios,\n    por_form: porForm,\n    por_whatsapp: porWhatsapp\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        528
+      ],
+      "id": "276081b7-6074-4e67-84d1-fa39b2a0f7d4",
+      "name": "Code (calcular métricas del día)"
+    },
+    {
+      "parameters": {
+        "content": "📊 CALCULATE TODAY'S METRICS\nCounts total leads, breakdown by category\n(cold/warm/hot) and by channel (form/WhatsApp).\nInput for the summary the owner receives.\n\n---\n\n📊 CALCULAR MÉTRICAS DEL DÍA\nCuenta total de leads, breakdown por categoría\n(frío/tibio/caliente) y por canal (form/WhatsApp).\nInsumo para el resumen que recibe el dueño.",
+        "height": 400,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        912,
+        272
+      ],
+      "id": "0be493ad-11e0-4f13-a146-b00e0880ade4",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "sendTo": "alejandroarroval@gmail.com",
+        "subject": "=Reporte diario de leads — AutoPremium {{ $json.fecha }}",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;\">\n  <h2 style=\"color:#0f3460;border-bottom:2px solid #0f3460;padding-bottom:10px;\">\n    📊 Reporte Diario de Leads — AutoPremium Medellín\n  </h2>\n  <p style=\"color:#666;font-size:13px;\">Fecha: {{ $json.fecha }}</p>\n  <table border=\"1\" cellpadding=\"10\" cellspacing=\"0\" style=\"border-collapse:collapse;width:100%;\">\n    <tr><td><strong>Total leads hoy</strong></td><td>{{ $json.total_leads }}</td></tr>\n    <tr><td>🔥 Calientes</td><td>{{ $json.calientes }}</td></tr>\n    <tr><td>🌡️ Tibios</td><td>{{ $json.tibios }}</td></tr>\n    <tr><td>❄️ Fríos</td><td>{{ $json.frios }}</td></tr>\n    <tr><td>📝 Por formulario</td><td>{{ $json.por_form }}</td></tr>\n    <tr><td>📱 Por WhatsApp</td><td>{{ $json.por_whatsapp }}</td></tr>\n  </table>\n  <p style=\"color:#999;font-size:12px;margin-top:30px;\">Generado automáticamente · AutoPremium Medellín</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        528
+      ],
+      "id": "ebbe210f-cb47-457b-929c-4d7b8e3fda5d",
+      "name": "Send a message",
+      "webhookId": "4db48825-4bf3-416d-ab2f-391a217d553f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gTmNXvBMnlDjAwZj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📧 SEND DAILY REPORT\nSends the day's metrics summary to the owner\nby email. Simple table: totals, breakdown by\ncategory and by channel. No AI — data comes\ndirectly from the Code node.\n\n---\n\n📧 ENVIAR REPORTE DIARIO\nManda el resumen de métricas del día al dueño\npor email. Tabla simple: total, breakdown por\ncategoría y por canal. Sin IA — son datos\ndirectos del Code node.",
+        "height": 416,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        256
+      ],
+      "id": "eb1e9029-b36f-4504-afd7-f511c9bf507f",
+      "name": "Sticky Note11"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets (Update, marcar \"contactado\")",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Code (calcular métricas del día)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code (calcular métricas del día)": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "307379f5-9d1d-4fa2-bb72-c23f3bbc830a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad71c5258db3ecec46cfbe0407ab958981cfdc96a9b91ef604ec3c3ea533e7e0"
+  },
+  "nodeGroups": [],
+  "id": "GFjijaCqVKMcjMqa",
+  "tags": []
+}
