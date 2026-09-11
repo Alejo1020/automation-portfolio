@@ -39,7 +39,7 @@ In the test scenario (5 simulated campaigns for a car dealership), the analysis 
 
 ## Tech Stack
 
-n8n (self-hosted) · Gemini API (free tier, testing only) · Google Sheets · Gmail
+n8n · Gemini API · Google Sheets · Gmail
 
 ## Key Technical Learnings
 
