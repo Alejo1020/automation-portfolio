@@ -36,17 +36,10 @@ Cada semana, el workflow trae los datos de campañas, calcula las métricas de e
 
 En el escenario de prueba (5 campañas simuladas de un concesionario de autos), el análisis identificó una **diferencia de 4.6x en costo por adquisición** entre la campaña más eficiente y la menos eficiente ($14.545 vs $67.778). Reasignar ese presupuesto hacia la campaña eficiente representa el potencial de casi duplicar el volumen de leads sin gasto adicional.
 
-## Cómo se vende esto
-
-- **Cliente objetivo:** negocios pequeños/medianos que corren Meta Ads sin un analista de marketing dedicado (concesionarios, clínicas, inmobiliarias, servicios locales).
-- **Setup fee:** $150–300 USD (integración con la cuenta real de Meta Ads, Sheets y correo del cliente).
-- **Recurrente mensual:** $80–150 USD/mes (mantenimiento + ajuste de prompt según categoría del negocio).
-- **Pitch:** *"No te vendo un dashboard más. Te doy un analista de marketing que revisa tus campañas cada semana y te dice, en lenguaje simple, dónde estás quemando plata."*
-- Upsell natural hacia un sistema completo de lead gen (captación multicanal + calificación con IA + reporting).
 
 ## Tech Stack
 
-n8n (self-hosted) · Gemini API (free tier, solo pruebas) · Google Sheets · Gmail
+n8n  · Gemini API · Google Sheets · Gmail
 
 ## Aprendizajes técnicos clave
 
