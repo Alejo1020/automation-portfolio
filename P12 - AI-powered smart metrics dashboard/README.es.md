@@ -50,13 +50,7 @@ Gmail — envía reporte HTML formateado al dueño
 
 Usando 8 semanas de datos realistas de un negocio de servicios, el sistema identificó una correlación no obvia que un dashboard estándar pasaría por alto: caídas en satisfacción del cliente y picos en tickets de soporte (semanas 5 y 8) precedieron consistentemente caídas de ventas la semana siguiente. Este tipo de insight, que cruza variables y razona sobre tendencia, requiere analizar múltiples métricas simultáneamente — justo lo que una tabla o gráfico estático no puede mostrar por sí solo.
 
-## Cómo Se Vende
-
-**Pitch:** *"Esto no es un dashboard — es un analista de negocio que nunca duerme. Cada semana, sin mover un dedo, el dueño recibe qué está pasando en su negocio, qué es lo más urgente, y qué hacer al respecto — el mismo nivel de razonamiento que pagaría por un consultor, entregado automáticamente y de forma constante."*
-
-**Cliente objetivo:** Negocios de servicios pequeños/medianos que ya trackean métricas (clínicas, concesionarios, inmobiliarias, agencias) pero no tienen el tiempo ni un analista interno para interpretarlas semana a semana.
-
-**Rango de precio:** $150–$400 USD/mes como add-on recurrente a un retainer de automatización existente, o $300–$600 USD como suscripción independiente de "analista de negocio con IA", dependiendo de la complejidad de los datos y frecuencia de reporte.
+*"Esto no es un dashboard — es un analista de negocio que nunca duerme. Cada semana, sin mover un dedo, el dueño recibe qué está pasando en su negocio, qué es lo más urgente, y qué hacer al respecto — el mismo nivel de razonamiento que pagaría por un consultor, entregado automáticamente y de forma constante."*
 
 ## Tech Stack
 
