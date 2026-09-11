@@ -45,13 +45,7 @@ A lead enters through a webhook (WhatsApp, a form, any external source), gets sc
 
 100% of incoming leads land in the CRM with zero manual entry. Hot leads (score 8-9+ in testing) generate a sales opportunity in the pipeline within seconds of the lead coming in, instead of hours or days of manual triage and data entry.
 
-## How This Sells
-
 *"I connect your lead capture system — WhatsApp, a form, whatever you use — directly to your CRM, with zero copy-pasting. AI qualifies the lead instantly, and if it's a real opportunity, it shows up in your sales pipeline ready to work."*
-
-**Target client:** small-to-mid businesses already using HubSpot (or another CRM) that currently rely on manual data entry from leads coming through WhatsApp, forms, or ads.
-
-**Price range:** $300-$600 USD for the initial integration (single CRM, qualification logic, deal creation), $50-150/month for maintenance or extending it to more lead sources.
 
 ## Tech Stack
 
