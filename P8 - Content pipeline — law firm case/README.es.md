@@ -25,12 +25,7 @@ Schedule Trigger → Get rows (temas pendientes) → Preparar Tema (Code)
 - Prueba real: 2/12 filas procesadas sin errores, contenido coherente y listo para publicar
 - Tiempo ahorrado estimado: generar este contenido manualmente tomaría 1-2 horas por tema; el pipeline lo hace en segundos
 
-## Cómo se vende
-Cliente objetivo: firmas de servicios profesionales pequeñas/medianas (legal, inmobiliaria, contable, clínicas) sin equipo de contenido interno.
-
-Pitch: "Cargás tus temas una vez al mes — el sistema entrega 3 piezas de contenido listas para revisar, cada semana, sin que nadie del equipo escriba desde cero."
-
-Rango de precio: $150-300 USD/mes como retainer de mantenimiento, o $400-600 USD como cobro único por implementación en la instancia del cliente.
+"Cargas tus temas una vez al mes — el sistema entrega 3 piezas de contenido listas para revisar, cada semana, sin que nadie del equipo escriba desde cero."
 
 ## Stack Técnico
 n8n · Google Gemini API (Flash) · Google Sheets · JavaScript (nodos Code)
