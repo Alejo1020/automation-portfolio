@@ -44,7 +44,6 @@ Foundational and mid-tier projects — n8n fundamentals through multi-agent syst
 | P18 | Real CRM integration (HubSpot) | ✅ Complete |
 | P19 | Automated billing/ROI system | ✅ Complete |
 | P20 | Voice agent (Twilio + Claude) | ✅ Complete |
-| P21 | End-to-end real client case study | ✅ Complete |
 
 ---
 
