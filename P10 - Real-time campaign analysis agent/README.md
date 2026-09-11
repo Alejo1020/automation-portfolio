@@ -33,17 +33,10 @@ Validated with two different question types, no reconfiguration needed:
 
 This demonstrates the agent generalizes across question types rather than answering a single hardcoded case.
 
-## How This Sells
-
-*"Instead of another dashboard you have to open and read, this is an AI analyst you message on WhatsApp — it answers with real campaign data, instantly, every day."*
-
-- **Target client:** small-to-mid business owners running Meta Ads (dealerships, clinics, e-commerce) who check performance reactively, not proactively.
-- **Price range:** $150–$400 USD setup + $30–$80 USD/month maintenance, depending on data source complexity (Sheets vs. live ad platform API).
-- **Positioning:** this is the technical foundation for multi-agent systems (P17) and the differentiator between "basic n8n automation" and "AI Automation Engineer."
 
 ## Tech Stack
 
-n8n · Claude API (Sonnet 5) · Google Sheets · Cloudflare Tunnel (local webhook exposure)
+n8n · Claude API (Sonnet 5) · Google Sheets · Cloudflare Tunnel
 
 ## Key Technical Learnings
 
