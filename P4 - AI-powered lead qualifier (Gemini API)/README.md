@@ -32,16 +32,10 @@ The webhook always responds immediately with the qualification result, regardles
 - Zero hot leads lost to slow follow-up
 - Zero wasted WhatsApp notifications on cold/warm leads
 
-## How This Sells
-
-- One-time setup fee to build and integrate the system with the client's existing CRM/WhatsApp/form.
-- Monthly maintenance fee for prompt tuning, monitoring, and support.
-- Pitch: *"Your sales team stops reviewing leads one by one — the system pings you on WhatsApp the moment a hot lead comes in, with the exact reason why."*
-- Target clients: real estate agencies, car dealerships, and any Meta Ads-driven business with high lead volume.
 
 ## Tech Stack
 
-n8n (self-hosted) · Gemini API (free tier, testing phase) · Google Sheets · Twilio WhatsApp Sandbox
+n8n  · Gemini API  · Google Sheets · Twilio WhatsApp Sandbox
 
 ## Key Technical Learnings
 
