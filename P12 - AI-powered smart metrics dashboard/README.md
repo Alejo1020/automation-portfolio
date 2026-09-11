@@ -50,13 +50,7 @@ Gmail — send formatted HTML report to owner
 
 Using 8 weeks of realistic service-business data, the system identified a non-obvious correlation that a standard dashboard would miss: drops in customer satisfaction and spikes in support tickets (weeks 5 and 8) consistently preceded sales dips the following week. This kind of cross-variable, trend-based insight requires reasoning across multiple metrics simultaneously — exactly what a static chart or table cannot surface on its own.
 
-## How This Sells
-
-**Pitch:** *"This isn't a dashboard — it's a business analyst that never sleeps. Every week, without lifting a finger, the owner gets what's happening in their business, what's most urgent, and what to do about it — the same caliber of reasoning they'd pay a consultant for, delivered automatically and consistently."*
-
-**Target client:** Small-to-mid service businesses that already track metrics (clinics, dealerships, real estate agencies, agencies) but lack the time or in-house analyst to interpret them weekly.
-
-**Price range:** $150–$400/month as a recurring add-on to an existing automation retainer, or $300–$600 as a standalone "AI business analyst" subscription, depending on data complexity and reporting frequency.
+*"This isn't a dashboard — it's a business analyst that never sleeps. Every week, without lifting a finger, the owner gets what's happening in their business, what's most urgent, and what to do about it — the same caliber of reasoning they'd pay a consultant for, delivered automatically and consistently."*
 
 ## Tech Stack
 
