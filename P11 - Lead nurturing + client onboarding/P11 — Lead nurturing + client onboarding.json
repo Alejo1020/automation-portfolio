@@ -1,0 +1,528 @@
+{
+  "name": "P11 — Lead nurturing + client onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -480,
+        -80
+      ],
+      "id": "4e10861e-b36c-4548-906b-80ff61cae16b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "⏰ SCHEDULE TRIGGER / DISPARADOR PROGRAMADO\n\nRuns every hour, checks which leads need their next touchpoint.\nCorre cada hora, revisa qué leads necesitan su siguiente contacto.",
+        "height": 336,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        -272
+      ],
+      "id": "202638c1-f0bf-40ac-9a1c-26bf543d62bc",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 472421002,
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=472421002"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "estado",
+              "lookupValue": "activo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        80,
+        -80
+      ],
+      "id": "ee191e3e-b9d3-4025-95e1-66dd5c5824a8",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📋 READ ACTIVE LEADS / LEER LEADS ACTIVOS\n\nPulls all leads with estado = \"activo\" from the sheet.\nTrae todos los leads con estado = \"activo\" de la hoja.",
+        "height": 272,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -208
+      ],
+      "id": "81829851-7ef0-47b8-b2d1-b59589b0639c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "🧮 EVALUATE WHO NEEDS A MESSAGE / EVALUAR QUIÉN NECESITA MENSAJE\n\nCompares category + stage against hours elapsed to filter who's due now.\nCompara categoría + etapa contra horas transcurridas para filtrar a quién le toca ahora.",
+        "height": 336,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -272
+      ],
+      "id": "c4cde74b-ee01-47bd-a084-2f68f2fc8289",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"anthropic-version\": \"2023-06-01\",\n  \"content-type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"claude-sonnet-5\",\n  max_tokens: 300,\n  messages: [\n    {\n      role: \"user\",\n      content: \"Eres un asistente de ventas por WhatsApp para un negocio en Medellín, Colombia. Escribe un mensaje corto (máx 3 líneas), cálido y natural en español colombiano, para un lead llamado \" + $json.nombre + \", categoría \" + $json.categoria + \", en el punto de contacto número \" + $json.siguiente_etapa + \" de la secuencia de seguimiento. Si es caliente: genera urgencia y ofrece cerrar la conversación pronto. Si es tibio: educa y genera confianza sin presionar. Si es frío: mantén presencia suave, sin sonar insistente. No uses emojis en exceso, máximo 1. Responde SOLO con el texto del mensaje, sin comillas ni explicación adicional.\"\n    }\n  ]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1264,
+        -80
+      ],
+      "id": "64ca68cb-c750-4851-87db-fb3170a9caa4",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_CLAUDE_API_CREDENTIAL_ID",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 GENERATE PERSONALIZED MESSAGE / GENERAR MENSAJE PERSONALIZADO\n\nClaude Sonnet 5 writes WhatsApp copy based on lead category and stage.\nClaude Sonnet 5 escribe el copy de WhatsApp según categoría y etapa del lead.",
+        "height": 352,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -272
+      ],
+      "id": "6cb632a4-0a8b-4b60-a53f-42c14f20bc0a",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst originales = $('Code: Evaluar quién necesita mensaje ahora').all();\n\nreturn items.map((item, i) => {\n  return {\n    json: {\n      row_number: originales[i].json.row_number,\n      nombre: originales[i].json.nombre,\n      telefono: originales[i].json.telefono,\n      categoria: originales[i].json.categoria,\n      etapa_nutricion: originales[i].json.etapa_nutricion,\n      siguiente_etapa: originales[i].json.siguiente_etapa,\n      mensaje: item.json.content[0].text\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        400
+      ],
+      "id": "72d3b245-1729-4cf0-9490-1f65816fe725",
+      "name": "Code: extraer el mensaje del response de Claude"
+    },
+    {
+      "parameters": {
+        "jsCode": "const umbrales = {\n  caliente: [0, 4, 24],\n  tibio: [24, 72, 168],\n  frio: [168, 504, 1080]\n};\n\nconst ahora = new Date();\nconst resultado = [];\n\nfor (const item of $input.all()) {\n  const d = item.json;\n\n  if (d.estado !== 'activo') continue;\n\n  const etapa = Number(d.etapa_nutricion);\n  const seq = umbrales[d.categoria];\n\n  if (!seq || etapa >= seq.length) continue;\n\n  const horasRequeridas = seq[etapa];\n  const ultimaFecha = new Date(d.ultima_actualizacion);\n  const horasTranscurridas = (ahora - ultimaFecha) / (1000 * 60 * 60);\n\n  if (horasTranscurridas >= horasRequeridas) {\n    resultado.push({\n      json: {\n        row_number: d.row_number,\n        nombre: d.nombre,\n        telefono: d.telefono,\n        categoria: d.categoria,\n        etapa_nutricion: etapa,\n        siguiente_etapa: etapa + 1,\n        fecha_ingreso: d.fecha_ingreso\n      }\n    });\n  }\n}\n\nreturn resultado;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -80
+      ],
+      "id": "0d38422a-6837-409c-b405-a1a44c5c544a",
+      "name": "Code: Evaluar quién necesita mensaje ahora"
+    },
+    {
+      "parameters": {
+        "content": "✂️ EXTRACT NURTURE MESSAGE / EXTRAER MENSAJE DE NUTRICIÓN\n\nPulls the clean text from Claude's response.\nSaca el texto limpio de la respuesta de Claude.",
+        "height": 304,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        256
+      ],
+      "id": "551fc053-b2c6-44c9-9e44-e3ee72d83c62",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+14155238886"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:{{ '+57' + $json.telefono }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.mensaje }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        176,
+        400
+      ],
+      "id": "2e839410-d01f-4085-8231-bde08678f0e0",
+      "name": "HTTP Request: enviar mensaje por Twilio",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_TWILIO_CREDENTIAL_ID",
+          "name": "Twilio"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📲 SEND WHATSAPP MESSAGE / ENVIAR MENSAJE DE WHATSAPP\n\nSends the generated message via Twilio sandbox.\nEnvía el mensaje generado vía el sandbox de Twilio.",
+        "height": 320,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        256
+      ],
+      "id": "a8a5078e-4883-4ef4-b5e3-38df1571b4ab",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 472421002,
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=472421002"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "etapa_nutricion": "={{ $json.siguiente_etapa }}",
+            "ultima_actualizacion": "={{ $now.format('yyyy-MM-dd') }}",
+            "estado": "={{ $json.siguiente_etapa >= 3 ? 'completado' : 'activo' }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha_ingreso",
+              "displayName": "fecha_ingreso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "etapa_nutricion",
+              "displayName": "etapa_nutricion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ultima_actualizacion",
+              "displayName": "ultima_actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1472,
+        400
+      ],
+      "id": "c85dfc06-d81d-40fa-ab90-100a918e7b29",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 UPDATE LEAD STAGE / ACTUALIZAR ETAPA DEL LEAD\n\nAdvances the nurture stage and marks \"completado\" if the sequence is done.\nAvanza la etapa de nutrición y marca \"completado\" si ya terminó la secuencia.",
+        "height": 336,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        240
+      ],
+      "id": "fa8a9382-fd04-4954-87e1-b9ba33ac9973",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "acb570cf-b75e-467a-9501-6c9c4b682c34",
+              "name": "row_number",
+              "value": "={{ $('Code: extraer el mensaje del response de Claude').item.json.row_number }}",
+              "type": "string"
+            },
+            {
+              "id": "c554d039-991f-47ca-adb7-720b22e579ed",
+              "name": "siguiente_etapa",
+              "value": "={{ $('Code: extraer el mensaje del response de Claude').item.json.siguiente_etapa }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        800,
+        400
+      ],
+      "id": "d155bf6a-5b6d-4e95-acd3-c2f6ac3b99ee",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PREPARE UPDATE DATA / PREPARAR DATOS DE ACTUALIZACIÓN\n\nRescues row_number and next stage before Twilio's response overwrites the JSON.\nRescata row_number y siguiente etapa antes de que la respuesta de Twilio sobrescriba el JSON.",
+        "height": 352,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        224
+      ],
+      "id": "338ce36c-72fb-4d12-8f44-1c649573e5fd",
+      "name": "Sticky Note7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code: Evaluar quién necesita mensaje ahora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code: extraer el mensaje del response de Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Evaluar quién necesita mensaje ahora": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: extraer el mensaje del response de Claude": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: enviar mensaje por Twilio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: enviar mensaje por Twilio": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "294c882d-8114-4339-a50d-cf45e3c95b98",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "LX1oiQ9zqlzobel6",
+  "tags": []
+}
