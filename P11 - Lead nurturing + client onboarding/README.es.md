@@ -39,17 +39,13 @@ Sistema probado end-to-end con 10 leads de prueba distribuidos en las 3 categor�
 
 Cero intervención manual en el ciclo evaluar → generar → enviar → actualizar.
 
-## Cómo se vende esto
 
 *"¿Cuántos leads se te enfrían porque nadie alcanza a escribirles a tiempo? Este sistema hace seguimiento automático a cada lead según qué tan interesado está — mensaje inmediato si es caliente, educación progresiva si es tibio, presencia constante sin fastidiar si es frío. Todo generado con IA, personalizado por nombre y contexto, sin que nadie tenga que acordarse de escribir. Se integra directo con tu WhatsApp Business."*
 
-**Precio de referencia:** setup $300-500 USD + $50-80 USD/mes de mantenimiento (o incluido en paquete de automatización más amplio, ej. junto con P4 calificador de leads).
-
-**A quién se lo vendo:** concesionarias, clínicas estéticas/dentales, inmobiliarias, firmas legales — cualquier negocio con volumen de leads y equipo de ventas pequeño que no da abasto con follow-up manual.
 
 ## Stack técnico
 
-n8n (self-hosted) · Claude Sonnet 5 (API de Anthropic) · Twilio (sandbox de WhatsApp) · Google Sheets
+n8n · Claude Sonnet 5 (API de Anthropic) · Twilio (sandbox de WhatsApp) · Google Sheets
 
 ## Aprendizajes técnicos clave
 
