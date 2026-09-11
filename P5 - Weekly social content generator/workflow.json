@@ -1,0 +1,226 @@
+{
+  "name": "P5 — Weekly social content generator",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "📅 DAILY TRIGGER / DISPARADOR DIARIO\n\nFires once a day to start the content generation cycle.\nSe activa una vez al día para iniciar el ciclo de generación de contenido.",
+        "height": 288,
+        "width": 432,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-1248, 0],
+      "id": "91dabf2e-4b44-4a30-b44b-55c1f3d5badd",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "triggerAtHour": 8 }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-1104, 144],
+      "id": "b836692c-86f9-4344-ae53-c39a48bb0d57",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YOUR_SHEET_GID",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=YOUR_SHEET_GID"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Fecha",
+              "lookupValue": "={{ $now.format('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-528, 144],
+      "id": "1e11b431-5963-4c32-8f15-6ce6fc8f9bfd",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📊 FETCH TODAY'S TOPIC / BUSCAR TEMA DEL DÍA\n\nMatches today's date against the content calendar to pull the topic.\nCompara la fecha actual con el calendario de contenido para traer el tema.",
+        "height": 320,
+        "width": 464,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-688, -32],
+      "id": "629fd184-3b03-4ef2-b06a-450dbd23dcf2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"content-type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Eres un experto en marketing de contenidos con más de 15 años de experiencia para redes sociales. Tema del día: {{ $json.Tema }}. Genera 2 posts distintos: 1) Post para Instagram (corto, casual, con emojis, máx 150 palabras) 2) Post para LinkedIn (profesional, sin emojis excesivos, máx 200 palabras). Responde SOLO en formato JSON así: {\\\"post_ig\\\": \\\"...\\\", \\\"post_linkedin\\\": \\\"...\\\"}, sin texto adicional ni markdown ni backticks.\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [128, 144],
+      "id": "a110f2e2-06f8-4381-a831-f7d03c47a766",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_GEMINI_CREDENTIAL_ID",
+          "name": "Gemini API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 GENERATE POSTS WITH GEMINI / GENERAR POSTS CON GEMINI\n\nSends the topic to Gemini's free tier and returns IG and LinkedIn drafts as JSON.\nEnvía el tema al free tier de Gemini y devuelve borradores de IG y LinkedIn en JSON.",
+        "height": 336,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-64, -32],
+      "id": "dba1a84b-cb4c-4e7f-854c-9009333c4fc8",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $input.first().json.candidates[0].content.parts[0].text;\nconst parsed = JSON.parse(rawText);\n\nreturn [{\n  json: {\n    Dia: $('Get row(s) in sheet').first().json.Dia,\n    Fecha: $('Get row(s) in sheet').first().json.Fecha,\n    Tema: $('Get row(s) in sheet').first().json.Tema,\n    Post_IG: parsed.post_ig,\n    Post_LinkedIn: parsed.post_linkedin,\n    Estado: 'Generado'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-928, 624],
+      "id": "2a8558ff-e1cd-430a-b27c-5d8d61d6fcc9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PARSE GEMINI RESPONSE / PARSEAR RESPUESTA DE GEMINI\n\nExtracts and parses the nested JSON string returned by Gemini.\nExtrae y parsea el string JSON anidado que devuelve Gemini.",
+        "height": 320,
+        "width": 544,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-960, 464],
+      "id": "19fa3b5b-8ff7-4c8d-9b0a-2cf0d8baee35",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YOUR_SHEET_GID",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=YOUR_SHEET_GID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $json.Fecha }}",
+            "Post_IG": "={{ $json.Post_IG }}",
+            "Post_LinkedIn": "={{ $json.Post_LinkedIn }}",
+            "Estado": "={{ $json.Estado }}"
+          },
+          "matchingColumns": ["Fecha"],
+          "schema": [
+            { "id": "Dia", "displayName": "Dia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Fecha", "displayName": "Fecha", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true, "removed": false },
+            { "id": "Tema", "displayName": "Tema", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Post_IG", "displayName": "Post_IG", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Post_LinkedIn", "displayName": "Post_LinkedIn", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Estado", "displayName": "Estado", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "row_number", "displayName": "row_number", "required": false, "defaultMatch": false, "display": true, "type": "number", "canBeUsedToMatch": true, "readOnly": true, "removed": true }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-32, 624],
+      "id": "817b57b1-3c89-4037-9575-fb584316c701",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💾 SAVE TO CALENDAR / GUARDAR EN CALENDARIO\n\nMatches by date and overwrites the row with both posts and status.\nBusca por fecha y sobreescribe la fila con ambos posts y el estado.",
+        "height": 320,
+        "width": 544,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-224, 480],
+      "id": "2e62bd0e-a1ea-4dbd-b69b-f4f21fb76be0",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Get row(s) in sheet", "type": "main", "index": 0 }]] },
+    "Get row(s) in sheet": { "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]] },
+    "HTTP Request": { "main": [[{ "node": "Code in JavaScript", "type": "main", "index": 0 }]] },
+    "Code in JavaScript": { "main": [[{ "node": "Update row in sheet", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e65e1718-995a-4701-bc40-58a6f538af05",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "C0iaJvo7aOtoT01s",
+  "tags": []
+}
