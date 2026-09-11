@@ -38,16 +38,6 @@ Reactiva automáticamente leads fríos/tibios que nunca recibieron seguimiento, 
 - El dueño tiene visibilidad diaria (volumen, desglose por calidad, split por canal) sin esfuerzo manual de reporting.
 - Totalmente demostrable de punta a punta: captación → calificación con IA → nutrición → reporting.
 
-## Cómo se vende esto
-
-**Cliente objetivo**: negocios con alto volumen de leads y equipo de ventas pequeño, en verticales de ticket alto donde perder un lead caliente por respuesta lenta cuesta plata — concesionarios, inmobiliarias, servicios legales, clínicas. Ideal: que ya tengan WhatsApp Business y algún tipo de formulario web.
-
-**Precios**:
-- Setup: $300–500 USD — integración de canales, prompt de calificación ajustado al negocio del cliente, conexión a su Sheets/CRM.
-- Recurrente: $80–150 USD/mes — mantenimiento, ajuste de prompts, monitoreo de disponibilidad, soporte.
-- Nota de costos de API: la versión de producción usa Claude API (no el free tier de Gemini usado en desarrollo), se cobra aparte o como pass-through.
-
-**Gap para vender hoy**: necesita dominio propio + Named Tunnel (no una URL rotativa de Quick Tunnel) antes de mostrárselo a un cliente real.
 
 ## Stack técnico
 
