@@ -1,0 +1,181 @@
+{
+  "name": "P10 — Real-time campaign analysis agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analisis-campanas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-656, -112],
+      "id": "1baf089b-8724-4665-b593-56b21c93028b",
+      "name": "Webhook",
+      "webhookId": "79d63e29-37cf-4a4d-869b-f2b13a26ad2d"
+    },
+    {
+      "parameters": {
+        "content": "🔔 WEBHOOK ENTRY / WEBHOOK - ENTRADA\n\nReceives the user's question about campaigns via POST; responds through Respond to Webhook since the AI Agent needs time to reason and use tools.\nRecibe la consulta del usuario sobre campañas vía POST; responde vía Respond to Webhook porque el AI Agent necesita tiempo para razonar y usar tools.",
+        "height": 368,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-800, -352],
+      "id": "d6cd9d86-1b66-4457-b1b0-994c56ec81bc",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "🧠 AI AGENT - CENTRAL NODE / AI AGENT - NODO CENTRAL\n\nReceives the question and decides whether to answer directly or call a tool to query campaign data; requires a Chat Model (required) and Tools (to act), Memory is optional.\nRecibe la pregunta y decide si responde directo o llama una tool para consultar datos de campañas; requiere Chat Model (obligatorio) y Tools (para actuar), Memory es opcional.",
+        "height": 416,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-192, -352],
+      "id": "f9ada78c-657b-4527-94fa-a00428d1f720",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.pregunta }}",
+        "options": {
+          "systemMessage": "Eres un analista de marketing digital experto en campañas de Meta Ads.\nTienes acceso a los datos de campañas del negocio a través de tus herramientas.\nResponde preguntas del dueño del negocio en español, de forma clara y directa,\ncon métricas concretas cuando estén disponibles. Si no tienes el dato, dilo —\nnunca inventes cifras.\n\nFormato de respuesta:\n- Texto plano, sin markdown (nada de tablas, negritas con **, ni encabezados #).\n- Usa saltos de línea y guiones simples para listar si hace falta.\n- Entrega directo la conclusión final. No muestres tu proceso de cálculo\n  ni dudas internas (\"espera, recalculo...\") — pensá internamente y\n  responde solo con el resultado ya verificado.\n- Máximo 3-4 líneas por respuesta, como si fuera un mensaje de WhatsApp."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [-64, -112],
+      "id": "1780b9c0-249a-4bf8-9a52-291797432188",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-5",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [-224, 368],
+      "id": "0478c62a-a917-4358-8b21-99b53019ccb9",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usa esta herramienta para consultar los datos de las campañas de Meta Ads\ndel negocio: nombre de campaña, spend, impresiones, clicks, conversiones.\nÚsala cuando el usuario pregunte sobre rendimiento, gasto, o resultados\nde alguna campaña específica o de todas.",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 451210162,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=451210162"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [352, 352],
+      "id": "f72943a2-f40d-4efb-8919-975064375720",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🔧 TOOL - GOOGLE SHEETS\n\nGives the agent read access to real campaign data; the agent decides on its own when to call it, based on the user's question and this tool's description.\nLe da al agente acceso de lectura a los datos reales de campañas; el agente decide solo cuándo llamarla, según la pregunta del usuario y esta descripción.",
+        "height": 384,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [144, 128],
+      "id": "204f49e3-20cf-47e8-bb7b-9793f91d518b",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "🤖 REASONING ENGINE / MOTOR DE RAZONAMIENTO\n\nClaude Sonnet 5 decides what to do with the user's question: answer directly or call a tool — this is not a fixed linear flow, the agent reasons and chooses.\nClaude Sonnet 5 decide qué hacer con la pregunta del usuario: responder directo o llamar una tool — no es un flujo lineal fijo, el agente razona y elige.",
+        "height": 352,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-480, 144],
+      "id": "06a4887e-1196-4ea7-8949-473192184d0a",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [592, -112],
+      "id": "b35874cb-e709-4aae-b3e6-3d4bd1e33d2a",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "📤 SEND RESPONSE / ENVIAR RESPUESTA\n\nReturns the agent's plain-text answer to the webhook caller, ready for WhatsApp with no markdown formatting.\nDevuelve la respuesta del agente en texto plano a quien llamó el webhook, lista para WhatsApp sin formato markdown.",
+        "height": 368,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [448, -320],
+      "id": "cbe8f7d7-4aed-40bd-9a3f-19d6f70aa80d",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": { "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]] },
+    "Anthropic Chat Model": { "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]] },
+    "Get row(s) in sheet in Google Sheets": { "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]] },
+    "AI Agent": { "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "53902212-14ec-4fcc-8ce3-d2fd9c2f3ec3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "sdOOqKVUmrd38EF6",
+  "tags": []
+}
