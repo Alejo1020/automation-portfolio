@@ -1,0 +1,453 @@
+{
+  "name": "P6 — Meta Ads campaign analyzer",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        -704
+      ],
+      "id": "6bd98f23-c754-404f-996e-0dacb4ec28c5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "content": "🚀 MANUAL TRIGGER / DISPARADOR MANUAL\n\nRuns the workflow on demand via \"Execute Workflow\". Replaced by a weekly Schedule Trigger in production.\nDispara el workflow manualmente con \"Execute Workflow\". Se reemplaza por un Schedule Trigger semanal en producción.",
+        "height": 336,
+        "width": 496,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2304,
+        -880
+      ],
+      "id": "61118bbb-8859-4c9f-9d0f-ed86b93c73b9",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 451210162,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=451210162"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1472,
+        -704
+      ],
+      "id": "f0c20422-db9c-4356-b230-e0224a0c4e40",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📥 READ CAMPAIGN DATA / LEER DATOS DE CAMPAÑAS\n\nReads Meta Ads campaign metrics, simulating the real Meta Ads API response.\nLee las métricas de campañas de Meta Ads, simulando la respuesta real de la API de Meta Ads.",
+        "height": 352,
+        "width": 464,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1648,
+        -896
+      ],
+      "id": "6cd4bb08-ffcd-471f-8159-a8a66b0b72c2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7b973b4e-02ac-4c86-9b9a-cd3bab851f35",
+              "name": "ctr",
+              "value": "={{ ($json.clicks / $json.impresiones * 100).toFixed(2) }}",
+              "type": "number"
+            },
+            {
+              "id": "23828cb0-c364-4bfa-8070-2ad36b8ddb95",
+              "name": "cpa",
+              "value": "={{ ($json.spend / $json.conversiones).toFixed(0) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        -704
+      ],
+      "id": "4f0d43e8-5825-411c-a1bc-0f0eb640a9cc",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "🧮 CALCULATE METRICS / CALCULAR MÉTRICAS\n\nComputes CTR and CPA per campaign so the AI compares real efficiency, not raw spend.\nCalcula CTR y CPA por campaña para que la IA compare eficiencia real, no solo gasto bruto.",
+        "height": 352,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        -896
+      ],
+      "id": "6cc7902f-d186-444f-869c-4386746cfae3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "campañas",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -2176,
+        -160
+      ],
+      "id": "65ba0a76-5e8f-4d88-befb-4b0582f32d1c",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "content": "🔗 AGGREGATE CAMPAIGNS / AGRUPAR CAMPAÑAS\n\nMerges all campaigns into one array so the AI can compare them together, not one by one.\nUne todas las campañas en un solo array para que la IA las compare entre sí, no una por una.",
+        "height": 320,
+        "width": 448,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2288,
+        -336
+      ],
+      "id": "13dc3617-9561-4ef0-bace-7d3db19b37e9",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text: \"Sos un analista de marketing digital. Analizá estas campañas de Meta Ads de un concesionario de autos y devolvé: 1) cuál campaña tiene mejor rendimiento y por qué, 2) cuál está desperdiciando presupuesto, 3) 2-3 recomendaciones accionables. Sé breve y directo, en español. Datos: \" + JSON.stringify($json.campañas)\n    }]\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1536,
+        -160
+      ],
+      "id": "b0645604-08b6-4aa7-8a43-6097af5dc1c5",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_GEMINI_CREDENTIAL_ID",
+          "name": "Gemini 1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🧠 AI CAMPAIGN ANALYSIS / ANÁLISIS DE CAMPAÑAS CON IA\n\nSends all campaigns to Gemini for a comparative analysis and actionable recommendations.\nEnvía todas las campañas a Gemini para un análisis comparativo y recomendaciones accionables.",
+        "height": 320,
+        "width": 512,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        -336
+      ],
+      "id": "aa3ad177-b240-4977-9c44-3487bb474bd5",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "42eb8fe2-f9fc-4fb9-b0b1-cd8df2c730b7",
+              "name": "fecha_analisis",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "f2b7a5af-9fa7-41ca-ae21-24e5f9c52417",
+              "name": "analisis",
+              "value": "={{ $json.candidates[0].content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -864,
+        -160
+      ],
+      "id": "4e2e5949-fdd1-4447-9c55-67eeb2204d87",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "content": "✂️ EXTRACT ANALYSIS / EXTRAER ANÁLISIS\n\nPulls the clean analysis text and date from Gemini's raw response.\nSaca el texto limpio del análisis y la fecha de la respuesta cruda de Gemini.",
+        "height": 320,
+        "width": 464,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        -336
+      ],
+      "id": "f9970f40-5e17-45a5-a0e1-89e42afbd2de",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1364195464,
+          "mode": "list",
+          "cachedResultName": "Historial_Analisis",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1364195464"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_analisis": "={{ $json.fecha_analisis }}",
+            "analisis": "={{ $json.analisis }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_analisis",
+              "displayName": "fecha_analisis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "analisis",
+              "displayName": "analisis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1936,
+        368
+      ],
+      "id": "3fdc6290-3d31-4730-9485-aba6ee7f3fc3",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📊 SAVE HISTORY / GUARDAR HISTORIAL\n\nAppends each weekly analysis with its date, building a trackable performance history.\nGuarda cada análisis semanal con su fecha, construyendo un historial rastreable de desempeño.",
+        "height": 320,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2080,
+        192
+      ],
+      "id": "efb24269-af11-4d4a-b236-f76b4e0f6316",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "subject": "=Análisis semanal de campañas - AutoPremium Medellín  {{ $json.fecha_analisis }}",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;\">\n  <h2 style=\"color:#0f3460;border-bottom:2px solid #0f3460;padding-bottom:10px;\">\n    📊 Análisis Semanal de Campañas — AutoPremium Medellín\n  </h2>\n  <p style=\"color:#666;font-size:13px;\">Fecha del análisis: {{ $json.fecha_analisis }}</p>\n  <div style=\"line-height:1.6;color:#333;\">\n    {{ $json.analisis.replace(/### (.*)/g, '<h3 style=\"color:#1a1a2e;margin-top:20px;\">$1</h3>').replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>').replace(/\\n\\n/g, '<br><br>').replace(/\\n/g, '<br>').replace(/---/g, '<hr style=\"border:none;border-top:1px solid #ddd;margin:20px 0;\">') }}\n  </div>\n  <p style=\"color:#999;font-size:12px;margin-top:30px;\">Generado automáticamente por sistema de análisis IA · AutoPremium Medellín</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1264,
+        368
+      ],
+      "id": "cc3302ea-7b36-40fc-95a5-da21d91fdd1e",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📧 SEND REPORT / ENVIAR REPORTE\n\nDelivers the formatted analysis by email, simulating client-ready reporting.\nEntrega el análisis formateado por correo, simulando un reporte listo para el cliente.",
+        "height": 320,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1440,
+        192
+      ],
+      "id": "7b82d05e-32e9-40e5-ae1d-6d4601d8ca71",
+      "name": "Sticky Note7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "62c0a700-5a55-4e59-a28c-cb25c4b8235f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "YOUR_WORKFLOW_ID",
+  "tags": []
+}
