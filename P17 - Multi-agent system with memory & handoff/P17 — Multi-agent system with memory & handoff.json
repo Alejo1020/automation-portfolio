@@ -1,0 +1,1004 @@
+{
+  "name": "P17 — Multi-agent system with memory & handoff",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -1072,
+        -256
+      ],
+      "id": "5b77f3e1-95ec-487c-b631-932f73b32289",
+      "name": "Telegram Trigger",
+      "webhookId": "411006dd-5618-425d-8c18-f89761693e55",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🚪 TELEGRAM TRIGGER / DISPARADOR DE TELEGRAM\n\nListens for incoming messages to the bot in real time. Key data: message.text, message.chat.id — channel-agnostic architecture, downstream logic doesn't change if WhatsApp/Twilio is connected later.\nEscucha mensajes entrantes al bot en tiempo real. Data clave: message.text, message.chat.id — arquitectura agnóstica de canal, la lógica de agentes no cambia si mañana se conecta WhatsApp/Twilio.",
+        "height": 432,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        -528
+      ],
+      "id": "ac69ed32-d88d-488a-981f-8253f548b328",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce167082-177c-495c-9805-3f29e263c3d1",
+              "name": "mensaje",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "a47d8ad6-3ea4-4abd-9425-1f9c244de8fa",
+              "name": "=usuario_id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "6659f840-215f-44c4-877e-e273e3fdbec0",
+              "name": "=nombre",
+              "value": "={{ $json.message.from.first_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -448,
+        -256
+      ],
+      "id": "c851634b-45b9-4ea1-a2a5-7b9f873f2c75",
+      "name": "Edit Fields (normalizar input)"
+    },
+    {
+      "parameters": {
+        "content": "🔧 NORMALIZE INPUT / NORMALIZAR INPUT\n\nTranslates Telegram-specific fields into generic names (mensaje, usuario_id, nombre) — decouples the input channel from the rest of the system.\nTraduce los campos específicos de Telegram a nombres genéricos (mensaje, usuario_id, nombre) — desacopla el canal de entrada del resto del sistema.",
+        "height": 400,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        -480
+      ],
+      "id": "b3c34a0e-f8b9-4f04-95a4-7476215108d6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.mensaje }}",
+        "options": {
+          "systemMessage": "Eres un clasificador de intenciones para un sistema de atención al cliente. Lee el mensaje del cliente considerando el historial de la conversación, y devuelve SOLO una palabra, sin explicación ni texto adicional: \"ventas\", \"agendamiento\" o \"soporte\".\n\nReglas:\n- \"agendamiento\": todo lo relacionado a agendar, reservar, confirmar, cambiar, reemplazar, modificar o cancelar una cita — incluye respuestas cortas de seguimiento (sí, confirmo, reemplázala, a las 5pm, cambiemos el horario) SI la conversación reciente ya trataba sobre una cita.\n- \"soporte\": SOLO quejas explícitas, errores del sistema, o el cliente pidiendo hablar con un humano. Modificar o reemplazar una cita NO es un problema de soporte, es agendamiento.\n- \"ventas\": precios, productos, servicios, o saludo/mensaje inicial sin contexto previo de cita.\n\nEjemplos:\n- Mensaje: \"reemplázala por favor\" (con historial reciente sobre una cita) → agendamiento\n- Mensaje: \"quiero cambiar el horario de mi cita\" → agendamiento\n- Mensaje: \"no me llegó la confirmación, esto no sirve\" → soporte\n- Mensaje: \"hola, cuánto cuesta el paquete premium\" → ventas\n\nIMPORTANTE — restricción absoluta: aunque el historial contenga mensajes de otro asistente conversando con el cliente sobre citas, precios, etc., vos NUNCA generás una respuesta conversacional, nunca saludás, nunca hacés preguntas, nunca confirmás nada. Tu única salida posible en cualquier caso es una de estas 3 palabras exactas, sin comillas, sin puntuación, sin texto antes ni después: ventas / agendamiento / soporte. El historial es solo para entender el CONTEXTO de la clasificación, no es una conversación en la que vos participás.\n\nAnte la duda, priorizá el tema de la conversación reciente en el historial por sobre el mensaje aislado."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        144,
+        -256
+      ],
+      "id": "88fdbb15-fb34-4c78-aebc-9524d73f4126",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        96,
+        -96
+      ],
+      "id": "d9110e7b-918f-401f-ab0e-98ce9119861a",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🧭 ORCHESTRATOR AGENT / AGENTE ORQUESTADOR\n\nClassifies the message into ventas / agendamiento / soporte using conversation history. No tools, output-only, feeds the Switch that performs the handoff. Claude Haiku 4.5.\nClasifica el mensaje en ventas / agendamiento / soporte usando el historial de conversación. Sin tools, solo output, alimenta el Switch que hace el handoff. Claude Haiku 4.5.",
+        "height": 528,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -480
+      ],
+      "id": "1c31dde8-95a7-4dbc-a952-bddd59d70982",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "ventas",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0a377404-8f15-4ad2-8d20-882c19e8e5be"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ventas"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8ab98d37-6efe-4dbf-8125-dc6312ef06b4",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "agendamiento",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "agendamiento"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ed3ed420-2cde-45dc-a078-cff4fe2c19f5",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "soporte",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "soporte"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        -272
+      ],
+      "id": "3495403c-d0f3-419e-94c6-230560e9db88",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Edit Fields (normalizar input)').item.json.mensaje }}",
+        "options": {
+          "systemMessage": "Eres un asesor comercial amable y directo. Respondes dudas sobre precios, productos y servicios. Si el cliente muestra intención real de compra, pregúntale su nombre y qué producto le interesa para poder ayudarlo mejor. Sé breve, cálido, en español latino."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1648,
+        -848
+      ],
+      "id": "a579bd96-f636-475b-b3e2-3bc7e10305c5",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-5",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        1504,
+        -656
+      ],
+      "id": "4975a8d9-c60e-494b-a340-df23e36331e0",
+      "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🔀 SWITCH — HANDOFF\n\nRoutes the conversation to the specialized agent based on the Orchestrator's classification. This is the exact handoff point — each branch has its own agent, memory and tools.\nRutea la conversación al agente especializado según la clasificación del Orquestador. Este es el punto exacto de handoff — cada rama tiene su propio agente, memoria y tools.",
+        "height": 432,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -512
+      ],
+      "id": "e60ec0bb-3779-40e1-9309-77c5c0cbd794",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields (normalizar input)').item.json.usuario_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1696,
+        -640
+      ],
+      "id": "870a8f56-c2ba-4c0e-8fb5-0bb016027870",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "content": "💼 SALES AGENT / AGENTE VENTAS\n\nAnswers commercial questions. Session-isolated memory (Session Key = usuario_id). Claude Sonnet 5.\nResponde dudas comerciales. Memoria aislada por sesión (Session Key = usuario_id). Claude Sonnet 5.",
+        "height": 512,
+        "width": 736
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        -1040
+      ],
+      "id": "8a1766a9-520c-4027-85be-fd462533a8d6",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ $('Edit Fields (normalizar input)').first().json.mensaje }}",
+        "options": {
+          "systemMessage": "Eres un asistente de agendamiento. Tu flujo de trabajo es siempre:\n\n1. Cuando el cliente muestra intención de agendar (nueva cita o cambio), PRIMERO consulta con la herramienta de lectura si ya tiene una cita registrada.\n2. Si NO tiene cita previa: pedile día, hora y motivo, confirmá los datos con el cliente, y cuando confirme, usa la herramienta de REGISTRAR.\n3. Si YA tiene una cita previa y quiere cambiarla: pedile los datos nuevos que quiera modificar, confirmá con el cliente, y cuando confirme, usa la herramienta de ACTUALIZAR — nunca crees una fila nueva en este caso.\n4. Nunca digas que agendaste o reemplazaste algo sin haber llamado realmente a la herramienta correspondiente.\n\nSé breve y claro, en español latino."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1776,
+        -336
+      ],
+      "id": "a85e655d-aa5d-4677-8b55-911d8975bff5",
+      "name": "AI Agent — Agendamiento"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-5",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        1408,
+        -96
+      ],
+      "id": "19102b2c-26d3-458f-97c9-a407aa32b9dc",
+      "name": "Anthropic Chat Model2",
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields (normalizar input)').first().json.usuario_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1552,
+        -96
+      ],
+      "id": "2d6e5d15-d89c-43cf-a9bc-9176a4f3b80d",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra una cita NUEVA. Úsala SOLO después de haber consultado con la herramienta de lectura y confirmado que el cliente NO tiene ninguna cita previa registrada.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1899088636,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1899088636"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fecha', ``, 'string') }}",
+            "hora": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('hora', ``, 'string') }}",
+            "motivo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('motivo', ``, 'string') }}",
+            "nombre_cliente": "={{ $('Edit Fields (normalizar input)').item.json.nombre }}",
+            "usuario_id": "={{ $('Edit Fields (normalizar input)').item.json.usuario_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_cliente",
+              "displayName": "nombre_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1728,
+        -80
+      ],
+      "id": "48c93c72-4925-42ee-9228-59cd2231917f",
+      "name": "Google Sheets Tool (conectada al Agente de Agendamiento)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields (normalizar input)').first().json.usuario_id }}",
+        "contextWindowLength": 6
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        208,
+        -64
+      ],
+      "id": "ed2c6cbb-1783-4aa4-8c3f-51377bf86a9e",
+      "name": "Simple Memory2"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Actualiza una cita EXISTENTE (cambia fecha, hora o motivo). Úsala SOLO después de haber consultado con la herramienta de lectura y confirmado que el cliente YA tiene una cita registrada. Busca la fila por usuario_id.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1899088636,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1899088636"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 0,
+            "fecha": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fecha', ``, 'string') }}",
+            "hora": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('hora', ``, 'string') }}",
+            "motivo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('motivo', ``, 'string') }}",
+            "nombre_cliente": "={{ $('Edit Fields (normalizar input)').first().json.nombre }}",
+            "usuario_id": "={{ $('Edit Fields (normalizar input)').first().json.usuario_id }}"
+          },
+          "matchingColumns": [
+            "usuario_id"
+          ],
+          "schema": [
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre_cliente",
+              "displayName": "nombre_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1888,
+        -96
+      ],
+      "id": "511bf094-6ae9-407e-af90-7de65f798290",
+      "name": "Update row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Consulta si el cliente ya tiene una cita agendada. Úsala SIEMPRE al inicio de cualquier conversación sobre agendamiento, ANTES de decidir si crear una cita nueva o actualizar una existente. Devuelve las citas registradas para este cliente (puede devolver vacío si no tiene ninguna).",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1899088636,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1899088636"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "usuario_id",
+              "lookupValue": "={{ $('Edit Fields (normalizar input)').first().json.usuario_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        2096,
+        -96
+      ],
+      "id": "9419b0e0-4bed-4123-8aa9-b75c2cff082b",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📅 SCHEDULING AGENT / AGENTE AGENDAMIENTO\n\nBooks, checks and updates appointments via 3 Google Sheets \ntools (read/create/update) — always reads first to decide create vs update, never assumes. Claude Sonnet 5.\nAgenda, consulta y actualiza citas con 3 tools de Google Sheets \n(leer/crear/actualizar) — siempre lee primero para decidir crear vs actualizar, nunca asume. Claude Sonnet 5.",
+        "height": 576,
+        "width": 896
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        -496
+      ],
+      "id": "b8926560-7cb7-4b1b-a83f-57d24007403d",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Edit Fields (normalizar input)').first().json.mensaje }}",
+        "options": {
+          "systemMessage": "Eres un agente de soporte. El cliente tiene una queja o problema. Tu trabajo es: 1) mostrar empatía genuina y breve, 2) confirmar que entendiste el problema repitiéndolo en tus palabras, 3) informar que un humano del equipo va a contactarlo pronto para resolverlo. Nunca prometas soluciones técnicas que no puedes verificar. Sé breve, cálido, en español latino."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1536,
+        352
+      ],
+      "id": "dfb129d5-0eae-4ad8-93e8-233aa9cf3bd0",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        1392,
+        512
+      ],
+      "id": "462cdada-c937-43d7-b224-9284f8d8ffaf",
+      "name": "Anthropic Chat Model3",
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields (normalizar input)').first().json.usuario_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1552,
+        560
+      ],
+      "id": "715baa35-080e-4a50-a7b8-f07c00655911",
+      "name": "Simple Memory3"
+    },
+    {
+      "parameters": {
+        "content": "🆘 SUPPORT AGENT / AGENTE SOPORTE\n\nHandles complaints with empathy, confirms the issue, and escalates to a human — no action tools, never promises unverifiable fixes. Claude Haiku 4.5.\nAtiende quejas con empatía, confirma el problema y escala a un humano — sin tools de acción, nunca promete soluciones que no puede verificar. Claude Haiku 4.5.",
+        "height": 512,
+        "width": 688
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        160
+      ],
+      "id": "a9e7556d-730b-408e-b909-c880dfcc2a24",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Edit Fields (normalizar input)').first().json.usuario_id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_notification": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2848,
+        -416
+      ],
+      "id": "6aee8843-474f-41e5-9884-642a104e8460",
+      "name": "Send a text message",
+      "webhookId": "d8060d58-308f-485d-bda8-75d69d12c6f1",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📤 TELEGRAM — FINAL RESPONSE / RESPUESTA FINAL\n\nReceives the output from any of the 3 specialized agents and sends it back to the client via Telegram — single exit point of the multi-agent system.\nRecibe el output de cualquiera de los 3 agentes especializados y lo envía de vuelta al cliente por Telegram — punto de salida único del sistema multi-agente.",
+        "height": 352,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2608,
+        -608
+      ],
+      "id": "8ad942c2-79c1-4520-b040-18a3ac750baa",
+      "name": "Sticky Note7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields (normalizar input)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields (normalizar input)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent — Agendamiento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent — Agendamiento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent — Agendamiento",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Tool (conectada al Agente de Agendamiento)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent — Agendamiento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent — Agendamiento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent — Agendamiento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent — Agendamiento": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fc2c7c39-75e2-40ca-a05d-c45acdd85d3f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "v3P7PcUMx3h6xVe0",
+  "tags": []
+}
