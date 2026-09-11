@@ -1,0 +1,438 @@
+{
+  "name": "P3 — Dashboard básico de métricas en Sheets.",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "ce5a71be-f5e1-42d0-a626-ab06f6912e7c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fecha = new Date().toISOString().split('T')[0];\nconst leads = Math.floor(Math.random() * 50) + 10;\nconst ventas = Math.floor(Math.random() * leads);\nconst ingreso = ventas * (Math.floor(Math.random() * 500) + 100);\n\nreturn [{\n  json: {\n    fecha,\n    leads,\n    ventas,\n    ingreso,\n    conversion: ((ventas / leads) * 100).toFixed(1)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -32
+      ],
+      "id": "bf8566b4-3f55-4838-b27d-ddefbcdb7f9a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Metricas_Diarias",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Metricas_Diarias",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leads",
+              "displayName": "leads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ventas",
+              "displayName": "ventas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ingreso",
+              "displayName": "ingreso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "conversion",
+              "displayName": "conversion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1056,
+        -32
+      ],
+      "id": "0edf2aac-68d5-4718-b19c-6d260c3f9161",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Metricas_Diarias",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Metricas_Diarias",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -240,
+        400
+      ],
+      "id": "700db78e-0478-43cf-80fc-49597802cdb0",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = items.map(i => i.json);\n\nconst totalLeads = rows.reduce((sum, r) => sum + Number(r.leads), 0);\nconst totalVentas = rows.reduce((sum, r) => sum + Number(r.ventas), 0);\nconst totalIngreso = rows.reduce((sum, r) => sum + Number(r.ingreso), 0);\nconst conversionPromedio = ((totalVentas / totalLeads) * 100).toFixed(1);\n\nreturn [{\n  json: {\n    fecha_actualizacion: new Date().toISOString().split('T')[0],\n    total_leads: totalLeads,\n    total_ventas: totalVentas,\n    total_ingreso: totalIngreso,\n    conversion_promedio: conversionPromedio\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        400
+      ],
+      "id": "74418f75-f2e0-4ae4-8265-7089abf446f8",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Metricas_Diarias",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2142829073,
+          "mode": "list",
+          "cachedResultName": "Resumen",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=2142829073"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_actualizacion": "={{ $json.fecha_actualizacion }}",
+            "total_leads": "={{ $json.total_leads }}",
+            "total_ventas": "={{ $json.total_ventas }}",
+            "total_ingreso": "={{ $json.total_ingreso }}",
+            "conversion_promedio": "={{ $json.conversion_promedio }}",
+            "row_number": 2
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "fecha_actualizacion",
+              "displayName": "fecha_actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_leads",
+              "displayName": "total_leads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_ventas",
+              "displayName": "total_ventas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_ingreso",
+              "displayName": "total_ingreso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "conversion_promedio",
+              "displayName": "conversion_promedio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1056,
+        400
+      ],
+      "id": "87d5f83f-df0b-4ff5-8f9d-46f102f4b228",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "▶️ START WORKFLOW / INICIAR WORKFLOW\n\nManual trigger to run the dashboard update on demand.\nTrigger manual para correr la actualización del dashboard cuando se necesite.",
+        "height": 304,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -192
+      ],
+      "id": "a0940dfc-5fb4-4afe-bccc-bb7010421248",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "📥 GENERATE SAMPLE DATA / GENERAR DATOS DE EJEMPLO\n\nSimulates daily leads, sales and revenue. In production this comes from a real CRM/form.\nSimula leads, ventas e ingreso diarios. En producción esto vendría de un CRM/formulario real.",
+        "height": 320,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -208
+      ],
+      "id": "019ecbc6-03f4-4937-b682-222f4173b41c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "📝 LOG DAILY RECORD / GUARDAR REGISTRO DIARIO\n\nAppends one row to \"Metricas_Diarias\" — raw historical log.\nAgrega una fila a \"Metricas_Diarias\" — log histórico crudo.",
+        "height": 320,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -208
+      ],
+      "id": "40c2cdd0-aad0-4e84-abd3-7187ce930b86",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "📂 READ FULL HISTORY / LEER HISTORIAL COMPLETO\n\nReads all rows from \"Metricas_Diarias\" to feed the totals calculation.\nLee todas las filas de \"Metricas_Diarias\" para alimentar el cálculo de totales.",
+        "height": 352,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        208
+      ],
+      "id": "0dc9b726-6b04-4704-aa24-27e12d4da1f3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "🧮 CALCULATE TOTALS / CALCULAR TOTALES\n\nSums/averages leads, sales, revenue and conversion rate across all history.\nSuma/promedia leads, ventas, ingreso y tasa de conversión de todo el histórico.",
+        "height": 352,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        304,
+        208
+      ],
+      "id": "ca41b31a-2333-49cc-a519-630d53edfda4",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "📊 LIVE DASHBOARD / DASHBOARD VIVO\n\nAlways overwrites row 2 in \"Resumen\" — a live snapshot, not a history log.\nSiempre sobreescribe la fila 2 de \"Resumen\" — es un snapshot vivo, no un historial.",
+        "height": 352,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        208
+      ],
+      "id": "b4726982-8c49-4cc9-af47-be85922b5530",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "63ed8323-f6f6-46b1-b2f1-57100f8489ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "f9xNlco1F7dztoAb",
+  "tags": []
+}
