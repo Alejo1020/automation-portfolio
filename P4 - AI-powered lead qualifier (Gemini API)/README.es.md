@@ -32,16 +32,10 @@ El webhook siempre responde de inmediato con el resultado de la calificación, s
 - Cero leads calientes perdidos por seguimiento lento
 - Cero notificaciones desperdiciadas en leads fríos/tibios
 
-## Cómo se vende
-
-- Fee de setup único para armar e integrar el sistema al CRM/WhatsApp/formulario actual del cliente.
-- Fee mensual de mantenimiento para ajuste de prompt, monitoreo y soporte.
-- Pitch: *"Tu equipo de ventas ya no revisa leads uno por uno — el sistema te avisa por WhatsApp apenas entra uno caliente, con la razón exacta de por qué lo es."*
-- Clientes objetivo: inmobiliarias, concesionarios y cualquier negocio con alto volumen de leads vía Meta Ads.
 
 ## Stack técnico
 
-n8n (self-hosted) · Gemini API (free tier, fase de pruebas) · Google Sheets · Twilio WhatsApp Sandbox
+n8n  · Gemini API  · Google Sheets · Twilio WhatsApp Sandbox
 
 ## Aprendizajes técnicos clave
 
