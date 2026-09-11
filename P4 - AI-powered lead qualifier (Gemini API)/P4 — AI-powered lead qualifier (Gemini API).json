@@ -1,0 +1,327 @@
+{
+  "name": "P4 — AI-powered lead qualifier (Gemini API)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/lead-qualifier",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-288, 144],
+      "id": "0b1c18df-303c-4607-8868-77500821b0ef",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "content": "📥 RECEIVE LEAD DATA / RECIBIR DATOS DEL LEAD\n\nReceives lead data via webhook (name, message, phone, source).\nRecibe datos del lead vía webhook (nombre, mensaje, teléfono, origen).",
+        "height": 336,
+        "width": 432,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-416, -48],
+      "id": "a07c721a-740f-491f-b65a-d2f657cfea97",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"Eres un calificador de leads inmobiliarios. Analiza este mensaje y responde SOLO con JSON: {\\\"score\\\": 1-10, \\\"categoria\\\": \\\"frio/tibio/caliente\\\", \\\"razon\\\": \\\"breve\\\"}. Mensaje del lead: {{ $json.body.mensaje }}, origen: {{ $json.body.origen }}\"\n    }]\n  }]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [288, 144],
+      "id": "d7368fb6-0450-4b71-bc7d-6563e5a9aabd",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gemini API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "33354a5a-ea81-4904-b3b5-6c3385ceb52b",
+              "name": "=resultado_limpio",
+              "value": "={{ $json.candidates[0].content.parts[0].text.replace('```json', '').replace('```', '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-368, 512],
+      "id": "30f1319a-e14c-4cdb-a2f9-c23f4ec5a476",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const parsed = JSON.parse($json.resultado_limpio);\n\nreturn {\n  nombre: $('Webhook').item.json.body.nombre,\n  telefono: $('Webhook').item.json.body.telefono,\n  mensaje: $('Webhook').item.json.body.mensaje,\n  origen: $('Webhook').item.json.body.origen,\n  score: parsed.score,\n  categoria: parsed.categoria,\n  razon: parsed.razon\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [256, 512],
+      "id": "0e4cb505-c49d-4358-9aab-a04d85305dcd",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YOUR_SHEET_GID",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nombre": "={{ $json.nombre }}",
+            "telefono": "={{ $json.telefono }}",
+            "mensaje": "={{ $json.mensaje }}",
+            "origen": "={{ $json.origen }}",
+            "score": "={{ $json.score }}",
+            "categoria": "={{ $json.categoria }}",
+            "razon": "={{ $json.razon }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "nombre", "displayName": "nombre", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "telefono", "displayName": "telefono", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "mensaje", "displayName": "mensaje", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "origen", "displayName": "origen", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "score", "displayName": "score", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "categoria", "displayName": "categoria", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "razon", "displayName": "razon", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [976, 512],
+      "id": "825b2d2f-c836-42d5-a454-2f27cc007092",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 3 },
+          "conditions": [
+            {
+              "id": "11d87d6b-00f8-4205-9fc9-117605a43409",
+              "leftValue": "={{ $json.categoria }}",
+              "rightValue": "caliente",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-400, 928],
+      "id": "6bb5b2eb-3f2d-4522-a733-4d5b62cd8951",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "🔀 FILTER HOT LEADS / FILTRAR LEADS CALIENTES\n\nOnly \"hot\" leads proceed to WhatsApp notification.\nSolo los leads \"calientes\" avanzan a la notificación por WhatsApp.",
+        "height": 304,
+        "width": 432,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-496, 768],
+      "id": "164e114f-de82-4c61-b4b1-7da795ea9037",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "From", "value": "whatsapp:+14155238886" },
+            { "name": "To", "value": "=whatsapp:{{ $json.telefono }}" },
+            { "name": "Body", "value": "=🔥 Lead caliente: {{ $json.nombre }} - Score {{ $json.score }}. Razón: {{ $json.razon }}" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [240, 912],
+      "id": "4c5dfdda-5814-497b-bfef-f60e3c26abec",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Twilio Basic Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📲 NOTIFY VIA WHATSAPP / NOTIFICAR POR WHATSAPP\n\nSends a WhatsApp alert via Twilio sandbox when a lead is hot.\nManda una alerta por WhatsApp vía sandbox de Twilio cuando el lead es caliente.",
+        "height": 304,
+        "width": 496,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [96, 768],
+      "id": "83910580-efad-47fa-8386-41be8846a854",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "🧠 QUALIFY LEAD WITH AI / CALIFICAR LEAD CON IA\n\nGemini analyzes the message and returns a score, category, and reason.\nGemini analiza el mensaje y devuelve score, categoría y razón.",
+        "height": 336,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [96, -48],
+      "id": "91042f54-f006-4d87-98ff-4e0ab32d2ffc",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "📤 RETURN RESULT / DEVOLVER RESULTADO\n\nSends the qualification result back to the webhook caller.\nDevuelve el resultado de la calificación a quien llamó al webhook.",
+        "height": 304,
+        "width": 480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [688, -16],
+      "id": "884c4756-d8eb-45ba-9a91-e5525693df0f",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": { "options": {} },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [896, 144],
+      "id": "712a1762-c1e4-4af0-8d6a-af2243852fec",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "✂️ CLEAN AI RESPONSE / LIMPIAR RESPUESTA DE IA\n\nStrips markdown backticks from Gemini's raw JSON output.\nQuita los backticks de markdown del JSON crudo de Gemini.",
+        "height": 304,
+        "width": 464,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-512, 352],
+      "id": "21a3daa6-382f-4705-a6da-6ba34c2d38ef",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PARSE AND STRUCTURE DATA / PARSEAR Y ESTRUCTURAR DATOS\n\nParses the clean JSON and builds a structured object with lead + score data.\nParsea el JSON limpio y arma un objeto estructurado con los datos del lead + calificación.",
+        "height": 304,
+        "width": 576,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [80, 352],
+      "id": "7978ae40-3d1c-47af-b7c3-d899a51038d9",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "📊 LOG QUALIFIED LEAD / REGISTRAR LEAD CALIFICADO\n\nSaves every qualified lead as a row in Google Sheets.\nGuarda cada lead calificado como fila en Google Sheets.",
+        "height": 288,
+        "width": 464,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [784, 368],
+      "id": "e613dade-bb18-4d46-8eea-900b54d5d578",
+      "name": "Sticky Note7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": { "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]] },
+    "HTTP Request": { "main": [[{ "node": "Edit Fields", "type": "main", "index": 0 }]] },
+    "Edit Fields": { "main": [[{ "node": "Code in JavaScript", "type": "main", "index": 0 }]] },
+    "Code in JavaScript": { "main": [[{ "node": "Append row in sheet", "type": "main", "index": 0 }]] },
+    "Append row in sheet": {
+      "main": [
+        [
+          { "node": "Respond to Webhook", "type": "main", "index": 0 },
+          { "node": "If", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "If": { "main": [[{ "node": "HTTP Request1", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "final",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "XNPSM86dwrvXMqQy",
+  "tags": []
+}
