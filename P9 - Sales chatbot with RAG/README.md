@@ -42,17 +42,10 @@ The knowledge base lives in a single Google Sheet tab. No vector database is use
 - Zero hallucinated prices or treatments — the model is constrained to the knowledge base and explicitly told to hand off to a human when it doesn't know
 - Knowledge base is editable by the business owner directly in Sheets, no developer needed for updates
 
-## How This Sells
-
-**Pitch:** "Your WhatsApp answers pricing, hours, and treatment questions instantly, 24/7, without your team being glued to the phone. You control the answers from a simple spreadsheet. When the bot doesn't know something, it hands off to a human — it never makes things up."
-
-**Target client:** Service businesses with high volumes of simple, repetitive inquiries and a small sales/reception team — aesthetic clinics, spas, gyms, real estate agencies, dental practices.
-
-**Price range:** $150–$400 USD one-time setup (knowledge base + workflow), or $50–$100 USD/month for maintenance and knowledge base updates.
 
 ## Tech Stack
 
-n8n (self-hosted, Docker) · Twilio WhatsApp API · Google Sheets · Gemini API (Google AI Studio) · Cloudflare Tunnel
+n8n · Twilio WhatsApp API · Google Sheets · Gemini API (Google AI Studio) · Cloudflare Tunnel
 
 ## Key Technical Learnings
 
