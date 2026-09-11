@@ -1,0 +1,575 @@
+{
+  "name": "P18 — Real CRM integration (HubSpot)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-crm",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -528,
+        -96
+      ],
+      "id": "9dc1165f-3fd4-4a78-88ac-0273efc5dfbd",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "content": "🚪 WEBHOOK - LEAD ENTRY POINT / ENTRADA DEL LEAD\n\nReceives new lead: name, email, phone, message, source.\nRecibe el lead nuevo: nombre, email, teléfono, mensaje, origen.",
+        "height": 304,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -272
+      ],
+      "id": "e058f452-84eb-4c2c-bd51-bd2aa98bcb6d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"claude-haiku-4-5\",\n  max_tokens: 300,\n  messages: [{\n    role: \"user\",\n    content: \"Eres un calificador de leads. Analiza este mensaje y responde SOLO con JSON válido, sin markdown ni backticks: {\\\"score\\\": 1-10, \\\"categoria\\\": \\\"frio/tibio/caliente\\\", \\\"razon\\\": \\\"breve\\\"}. Mensaje del lead: \" + $json.body.mensaje + \", origen: \" + $json.body.origen\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        48,
+        -96
+      ],
+      "id": "c9a302eb-9681-4df1-a367-0c37d4d5c3a1",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "XLGM3QgueVEsFdgs",
+          "name": "Claude API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🤖 CLAUDE API - QUALIFY LEAD / CALIFICAR LEAD\n\nScores the lead (1-10) and classifies it as cold/warm/hot using Claude Haiku 4.5.\nCalifica el lead (1-10) y lo clasifica en frío/tibio/caliente con Claude Haiku 4.5.",
+        "height": 304,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -256
+      ],
+      "id": "3e7c1581-2740-4193-8fe1-b07865e80709",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $json.content[0].text.replace(/```json/g, '').replace(/```/g, '').trim();\nconst parsed = JSON.parse(rawText);\n\nreturn {\n  nombre: $('Webhook').item.json.body.nombre,\n  email: $('Webhook').item.json.body.email,\n  telefono: $('Webhook').item.json.body.telefono,\n  mensaje: $('Webhook').item.json.body.mensaje,\n  origen: $('Webhook').item.json.body.origen,\n  score: parsed.score,\n  categoria: parsed.categoria,\n  razon: parsed.razon\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "0f3edac8-4927-4b33-a40a-9246edc77b75",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "🔧 PARSE CLAUDE RESPONSE / PARSEAR RESPUESTA DE CLAUDE\n\nExtracts and sanitizes Claude's JSON, merges it with the original lead data.\nExtrae y limpia el JSON de Claude, lo une con los datos originales del lead.",
+        "height": 304,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -256
+      ],
+      "id": "e2b125d0-3e29-403c-802c-da9df29c079f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  filterGroups: [{\n    filters: [{\n      propertyName: \"email\",\n      operator: \"EQ\",\n      value: $json.email\n    }]\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1296,
+        -96
+      ],
+      "id": "470b2f61-3807-4a97-a653-8e979f4fea33",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "qkqKdhxvRV36oN6R",
+          "name": "HubSpot Token Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🔍 HUBSPOT - SEARCH CONTACT / BUSCAR CONTACTO\n\nChecks if a contact with this email already exists in HubSpot.\nVerifica si ya existe un contacto con este email en HubSpot.",
+        "height": 304,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        -240
+      ],
+      "id": "21574fc6-e6f2-4e2f-8cca-bc9b601bca1c",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "77748079-c98c-49c8-8036-a6e897b94375",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -544,
+        672
+      ],
+      "id": "9ca1ed07-7298-4f1a-b309-1c87edca6d5d",
+      "name": "If — ¿el contacto ya existe?"
+    },
+    {
+      "parameters": {
+        "content": "🔀 IF - CONTACT EXISTS? / ¿CONTACTO YA EXISTE?\n\nRoutes to update (true) or create (false) based on search result.\nEnruta a actualizar (true) o crear (false) según el resultado de la búsqueda.",
+        "height": 320,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        512
+      ],
+      "id": "e8ebcae1-662a-4e59-ad90-f926dd03c2d5",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  properties: {\n    email: $('Code in JavaScript').item.json.email,\n    firstname: $('Code in JavaScript').item.json.nombre,\n    phone: $('Code in JavaScript').item.json.telefono,\n    hs_lead_status: $('Code in JavaScript').item.json.categoria === \"caliente\" ? \"NEW\" : \"OPEN\",\n    lifecyclestage: \"lead\"\n  }\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        112,
+        912
+      ],
+      "id": "ccf9408a-cced-47f4-a7c5-2397ab6b8903",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "qkqKdhxvRV36oN6R",
+          "name": "HubSpot Token Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🔄 HUBSPOT - UPDATE CONTACT / ACTUALIZAR CONTACTO\n\nUpdates the existing contact found by email.\nActualiza el contacto existente encontrado por email.",
+        "height": 320,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        752
+      ],
+      "id": "e57ee768-f7f8-4483-a5ac-9e6dde589522",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.hubapi.com/crm/v3/objects/contacts/{{ $json.results[0].id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  properties: {\n    firstname: $('Code in JavaScript').item.json.nombre,\n    phone: $('Code in JavaScript').item.json.telefono,\n    hs_lead_status: $('Code in JavaScript').item.json.categoria === \"caliente\" ? \"NEW\" : \"OPEN\"\n  }\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        112,
+        544
+      ],
+      "id": "0590ad9f-bdc0-4058-a609-604a09bb7903",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "qkqKdhxvRV36oN6R",
+          "name": "HubSpot Token Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "✨ HUBSPOT - CREATE CONTACT / CREAR CONTACTO NUEVO\n\nCreates a new contact with lead status based on qualification.\nCrea un contacto nuevo con estado de lead según la calificación.",
+        "height": 320,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        368
+      ],
+      "id": "04fe8df6-43cb-4e40-8e3f-2320c761a253",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        864,
+        672
+      ],
+      "id": "0aca7518-1cc1-4a7e-b698-43bbe6549976",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "🔗 MERGE - UNIFY BRANCHES / UNIFICAR RAMAS\n\nJoins the create/update branches into a single path (Append mode).\nUne las ramas de crear/actualizar en un solo camino (modo Append).",
+        "height": 352,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        496
+      ],
+      "id": "5fdf081b-bf44-467d-b83a-056a98147648",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5f4e626a-6df0-4d7b-b3a3-3a314f94e2c7",
+              "leftValue": "={{ $('Code in JavaScript').item.json.categoria }}",
+              "rightValue": "caliente",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1536,
+        672
+      ],
+      "id": "86bb7e7b-abf0-4a4a-9c94-6159b32f814c",
+      "name": "If — ¿es lead caliente?"
+    },
+    {
+      "parameters": {
+        "content": "🔥 IF - HOT LEAD? / ¿LEAD CALIENTE?\n\nOnly hot leads trigger deal creation in the sales pipeline.\nSolo los leads calientes disparan la creación de un deal en el pipeline.",
+        "height": 320,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        528
+      ],
+      "id": "6351ffd3-fea4-468a-b5cf-2d86e7d7d2c3",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/deals",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  properties: {\n    dealname: \"Lead caliente - \" + $('Code in JavaScript').item.json.nombre,\n    pipeline: \"default\",\n    dealstage: \"1417240120\",\n    amount: \"0\"\n  },\n  associations: [{\n    to: { id: $json.id },\n    types: [{\n      associationCategory: \"HUBSPOT_DEFINED\",\n      associationTypeId: 3\n    }]\n  }]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2208,
+        656
+      ],
+      "id": "bae47362-1751-4061-b20f-09a23c621033",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "qkqKdhxvRV36oN6R",
+          "name": "HubSpot Token Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "💰 HUBSPOT - CREATE DEAL / CREAR DEAL\n\nCreates a Deal in the custom stage, associated to the contact.\nCrea un Deal en la etapa custom, asociado al contacto.",
+        "height": 320,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2048,
+        528
+      ],
+      "id": "1a1cb9bb-4930-48a5-a7a3-905c8b311414",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  status: \"ok\",\n  categoria: $('Code in JavaScript').item.json.categoria,\n  score: $('Code in JavaScript').item.json.score,\n  deal_creado: $('Code in JavaScript').item.json.categoria === \"caliente\"\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1824,
+        1248
+      ],
+      "id": "a7416bc1-d809-433b-957c-d61db53040e3",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "✅ RESPOND TO WEBHOOK / RESPONDER AL WEBHOOK\n\nSends back status, category, score and whether a deal was created.\nDevuelve status, categoría, score y si se creó un deal.",
+        "height": 352,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        1072
+      ],
+      "id": "3ce13b76-5486-48a4-a884-53489e8e5c5f",
+      "name": "Sticky Note10"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If — ¿el contacto ya existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If — ¿el contacto ya existe?": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If — ¿es lead caliente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If — ¿es lead caliente?": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fc938469-35b5-46c7-9ab8-cd0d4db93f6e",
+  "meta": {
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "YahPTZWVaGnACIS6",
+  "tags": []
+}
