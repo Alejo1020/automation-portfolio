@@ -25,10 +25,7 @@ Schedule Trigger → Get rows (pending topics) → Prepare Topic (Code)
 - Live test: 2/12 rows processed with zero errors, coherent and publish-ready output
 - Estimated time saved: manual generation of this content would take 1-2 hours per topic; the pipeline does it in seconds
 
-## How This Sells
-Target client: small-to-mid professional service firms (law, real estate, accounting, healthcare clinics) with no in-house content team.
-
-Pitch: "Load your topics once a month — the system delivers 3 ready-to-review content pieces per topic, every week, without anyone on your team writing from scratch."
+"Load your topics once a month — the system delivers 3 ready-to-review content pieces per topic, every week, without anyone on your team writing from scratch."
 
 Price range: $150-300 USD/month as a maintenance retainer (calendar upkeep, tone adjustments, channel expansion), or $400-600 USD as a one-time build fee for the client's own instance.
 
