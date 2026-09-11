@@ -34,12 +34,6 @@ Two Google Sheets tabs:
 
 Removes the manual process of consolidating daily metrics entirely. The owner opens one sheet and sees total leads, closed sales, accumulated revenue, and conversion % — always current, with no admin time spent compiling it.
 
-## How This Sells
-
-- **Target client:** small service businesses without a CRM or reporting habit (agencies, dealerships, clinics, consultancies)
-- **Pitch:** "Automated Sales Dashboard Setup" — a lightweight, fast-to-deploy automation that replaces manual spreadsheet upkeep
-- **Price range:** $150–300 USD, 2-3 day delivery
-- **Natural upsell path:** pairs directly with lead qualification (AI-scored leads) and campaign analysis add-ons — same client, expanded scope
 
 ## Tech Stack
 
