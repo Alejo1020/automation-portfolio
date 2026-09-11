@@ -33,17 +33,11 @@ continue → loops back to listening | say goodbye → hangs up | transfer → d
 
 Live test call verified end-to-end: the agent greeted the caller, understood a spoken question about business hours, and — in a later turn — correctly recalled the caller's name without being told again, confirmed in the conversation log saved to Google Sheets.
 
-## How This Sells
-
 *"Your business never misses a call again. This agent answers 24/7, understands what callers are asking, remembers the context of the conversation, and knows when to hand the call to you because the customer is ready to close — or when to wrap up on its own because the question's been answered. It's not a numeric IVR menu: it's a real conversation."*
-
-**Target client:** service businesses with call volume that can't justify full-time reception — clinics, auto shops, real estate agencies, small law firms.
-
-**Pricing model:** setup fee + monthly rate that includes Twilio call minutes (passed through to the client, not absorbed into margin).
 
 ## Tech Stack
 
-n8n (self-hosted) · Claude API (Haiku 4.5) · Twilio Programmable Voice · Google Sheets · Cloudflare Tunnel
+n8n · Claude API (Haiku 4.5) · Twilio Programmable Voice · Google Sheets · Cloudflare Tunnel
 
 ## Key Technical Learnings
 
